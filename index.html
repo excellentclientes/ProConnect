@@ -179,19 +179,59 @@
     </main>
 
     <!-- ========================================== -->
-    <!-- MODAL DE DETALHES DO POST                  -->
+    <!-- SUBPÁGINA / MODAL DE DETALHES (2 COLUNAS)  -->
     <!-- ========================================== -->
-    <div id="postModal" class="hidden fixed inset-0 z-50 flex justify-end glass-modal">
-        <div class="bg-white w-full max-w-2xl h-full shadow-2xl flex flex-col transform transition-transform border-l border-slate-200 overflow-y-auto relative">
-            <button onclick="fecharModal()" class="absolute top-6 right-6 w-10 h-10 bg-slate-100 rounded-full flex items-center justify-center text-slate-600 hover:bg-slate-200 z-10"><i class="fas fa-times"></i></button>
+    <div id="postModal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 md:p-6 overflow-y-auto">
+        <div class="bg-white w-full max-w-6xl rounded-2xl shadow-2xl overflow-hidden relative flex flex-col max-h-[92vh]">
+            <!-- Botão Fechar -->
+            <button onclick="fecharModal()" class="absolute top-4 right-4 w-10 h-10 bg-slate-100 hover:bg-slate-200 rounded-full flex items-center justify-center text-slate-700 z-20 transition-colors shadow-md">
+                <i class="fas fa-times text-lg"></i>
+            </button>
             
-            <div id="modalContent" class="pb-24">
-                <!-- Conteúdo do post injetado via JS -->
-            </div>
-            
-            <!-- Barra inferior Fixa de Ação -->
-            <div id="modalActions" class="fixed bottom-0 w-full max-w-2xl bg-white border-t border-slate-200 p-4 flex gap-4">
-                <!-- Botões (Whats, Comprar, Download) injetados via JS -->
+            <!-- Grid de 2 Colunas (Subpágina Imersiva) -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 flex-1 overflow-y-auto">
+                <!-- Coluna Esquerda: Imagem sem cortes e Descrição -->
+                <div class="p-6 md:p-8 border-b lg:border-b-0 lg:border-r border-slate-200 space-y-6 flex flex-col bg-slate-50/30">
+                    <div class="w-full bg-slate-100 rounded-xl overflow-hidden flex items-center justify-center border border-slate-200">
+                        <img id="modalImg" src="" class="w-full max-h-[400px] object-contain">
+                    </div>
+                    <div class="space-y-3">
+                        <h2 id="modalTitulo" class="text-2xl md:text-3xl font-bold text-slate-900"></h2>
+                        <p id="modalDesc" class="text-slate-600 whitespace-pre-wrap leading-relaxed text-sm md:text-base"></p>
+                    </div>
+                </div>
+
+                <!-- Coluna Direita: Ações, Avaliações e Comentários -->
+                <div class="p-6 md:p-8 flex flex-col justify-between space-y-6 bg-white">
+                    <div class="space-y-6">
+                        <!-- Botões de Ação (Whats, Download/Compra) -->
+                        <div id="modalActions" class="flex flex-col sm:flex-row gap-3">
+                            <!-- Injetado dinamicamente via JS -->
+                        </div>
+
+                        <!-- Caixa de Avaliação -->
+                        <div class="bg-slate-50 p-5 rounded-xl border border-slate-200 space-y-3">
+                            <h3 class="font-bold text-sm text-slate-800">Avalie este produto/serviço</h3>
+                            <select id="inputNota" class="w-full border border-slate-200 rounded-lg p-2.5 text-sm outline-none bg-white">
+                                <option value="5">5 Estrelas - Excelente</option>
+                                <option value="4">4 Estrelas - Muito Bom</option>
+                                <option value="3">3 Estrelas - Regular</option>
+                                <option value="2">2 Estrelas - Ruim</option>
+                                <option value="1">1 Estrela - Péssimo</option>
+                            </select>
+                            <textarea id="inputComentario" class="w-full border border-slate-200 rounded-lg p-3 text-sm outline-none bg-white" rows="2" placeholder="Escreva um comentário..."></textarea>
+                            <button id="btnEnviarComentario" class="w-full py-2.5 bg-slate-900 text-white rounded-lg text-sm font-semibold hover:bg-slate-800 transition-colors">Enviar Avaliação</button>
+                        </div>
+
+                        <!-- Comentários da Comunidade -->
+                        <div class="space-y-2">
+                            <h4 class="font-semibold text-xs text-slate-400 uppercase tracking-wider">Comentários anteriores:</h4>
+                            <div id="containerComentarios" class="space-y-2 max-h-40 overflow-y-auto pr-1">
+                                <!-- Injetado via JS -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -516,67 +556,73 @@
 
         window.abrirModal = async (postId) => {
             const modal = document.getElementById('postModal');
-            const content = document.getElementById('modalContent');
-            const actions = document.getElementById('modalActions');
-            
-            content.innerHTML = "<div class='p-12 text-center'>Carregando...</div>";
-            actions.innerHTML = "";
             modal.classList.remove('hidden');
+
+            // Limpa dados temporários antes de carregar
+            document.getElementById('modalImg').src = "";
+            document.getElementById('modalTitulo').innerText = "Carregando...";
+            document.getElementById('modalDesc').innerText = "";
+            document.getElementById('containerComentarios').innerHTML = "<p class='text-slate-400 text-sm'>Carregando...</p>";
+            document.getElementById('modalActions').innerHTML = "";
 
             const pRef = doc(db, "anuncios", postId);
             const snap = await getDoc(pRef);
             if(!snap.exists()) return;
             const p = snap.data();
 
-            // Buscar comentarios do banco
+            // Preenche os dados nos elementos corretos do Grid
+            document.getElementById('modalImg').src = p.imagem;
+            document.getElementById('modalTitulo').innerText = p.titulo;
+            document.getElementById('modalDesc').innerText = p.descricao;
+
+            // Atribui a função de envio ao botão
+            document.getElementById('btnEnviarComentario').onclick = () => enviarComentario(postId);
+
+            // Carrega os comentários
+            await carregarComentariosModal(postId);
+
+            // Monta os botões na coluna direita
+            const actionsDiv = document.getElementById('modalActions');
+            
+            if(p.whatsapp) {
+                actionsDiv.innerHTML += `<a href="https://wa.me/${p.whatsapp}" target="_blank" class="flex-1 py-3.5 bg-green-500 hover:bg-green-600 text-white text-center rounded-xl font-bold flex items-center justify-center gap-2 transition-colors shadow-sm"><i class="fab fa-whatsapp text-lg"></i> Contato</a>`;
+            }
+            
+            if(p.tipo === 'gratis') {
+                if(p.arquivoData) {
+                    actionsDiv.innerHTML += `<a href="${p.arquivoData}" download="${p.arquivoNome || 'arquivo'}" class="flex-1 py-3.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold flex items-center justify-center gap-2 transition-colors text-center shadow-sm"><i class="fas fa-download"></i> Baixar</a>`;
+                } else {
+                    actionsDiv.innerHTML += `<button onclick="alert('Nenhum arquivo anexado')" class="flex-1 py-3.5 bg-slate-300 text-slate-600 rounded-xl font-bold">Sem arquivo</button>`;
+                }
+            } else if(p.tipo === 'pago') {
+                actionsDiv.innerHTML += `<button onclick="alert('Redirecionando para o Gateway de pagamento...')" class="flex-1 py-3.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-bold flex items-center justify-center gap-2 transition-colors shadow-sm"><i class="fas fa-shopping-cart"></i> Comprar (R$ ${p.preco})</button>`;
+            }
+        };
+
+        async function carregarComentariosModal(postId) {
             const commSnap = await getDocs(collection(db, `anuncios/${postId}/comentarios`));
-            let listaComentariosHtml = "";
+            const container = document.getElementById('containerComentarios');
+            container.innerHTML = "";
+            
+            let count = 0;
             commSnap.forEach(c => {
+                count++;
                 const cd = c.data();
-                listaComentariosHtml += `<div class="bg-slate-50 p-3 rounded-xl mb-2 text-sm"><div class="flex justify-between font-bold text-slate-700"><span>${cd.usuario}</span><span class="text-yellow-500">${cd.nota}★</span></div><p class="text-slate-600 mt-1">${cd.texto}</p></div>`;
+                container.innerHTML += `
+                    <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 text-xs shadow-xs">
+                        <div class="flex justify-between font-bold text-slate-800 mb-1">
+                            <span>${cd.usuario}</span>
+                            <span class="text-yellow-500">${cd.nota}★</span>
+                        </div>
+                        <p class="text-slate-600">${cd.texto}</p>
+                    </div>
+                `;
             });
 
-            content.innerHTML = `
-                <img src="${p.imagem}" class="w-full h-72 object-cover">
-                <div class="p-8 space-y-6">
-                    <div>
-                        <h2 class="text-3xl font-bold mb-2">${p.titulo}</h2>
-                        <p class="text-slate-600 whitespace-pre-wrap leading-relaxed">${p.descricao}</p>
-                    </div>
-                    
-                    <div class="pt-6 border-t border-slate-200">
-                        <h3 class="font-bold text-lg mb-4">Deixe sua Avaliação e Comentário</h3>
-                        <div class="space-y-3">
-                            <select id="inputNota" class="w-full border border-slate-200 rounded-lg p-3 text-sm outline-none bg-white">
-                                <option value="5">5 Estrelas - Excelente</option>
-                                <option value="4">4 Estrelas - Muito Bom</option>
-                                <option value="3">3 Estrelas - Regular</option>
-                                <option value="2">2 Estrelas - Ruim</option>
-                                <option value="1">1 Estrela - Péssimo</option>
-                            </select>
-                            <textarea id="inputComentario" class="w-full border border-slate-200 rounded-lg p-4 text-sm outline-none" rows="3" placeholder="Escreva seu depoimento..."></textarea>
-                            <button onclick="enviarComentario('${postId}')" class="px-6 py-2.5 bg-slate-900 text-white rounded-lg text-sm font-semibold hover:bg-slate-800">Enviar Comentário</button>
-                        </div>
-
-                        <div class="mt-6 space-y-2">
-                            <h4 class="font-semibold text-sm text-slate-500">Comentários da Comunidade:</h4>
-                            <div id="containerComentarios">${listaComentariosHtml || '<p class="text-slate-400 text-sm">Seja o primeiro a avaliar!</p>'}</div>
-                        </div>
-                    </div>
-                </div>
-            `;
-
-            let btnWhats = p.whatsapp ? `<a href="https://wa.me/${p.whatsapp}" target="_blank" class="flex-1 py-4 bg-green-500 hover:bg-green-600 text-white text-center rounded-xl font-bold flex items-center justify-center gap-2 transition-colors"><i class="fab fa-whatsapp text-xl"></i> Contato</a>` : '';
-            
-            let btnPrincipal = "";
-            if(p.tipo === 'gratis') {
-                btnPrincipal = p.arquivoData ? `<a href="${p.arquivoData}" download="${p.arquivoNome || 'arquivo'}" class="flex-1 py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold flex items-center justify-center gap-2 transition-colors text-center"><i class="fas fa-download"></i> Baixar Arquivo</a>` : `<button onclick="alert('Nenhum arquivo anexado')" class="flex-1 py-4 bg-slate-300 text-slate-600 rounded-xl font-bold">Sem arquivo</button>`;
-            } else if(p.tipo === 'pago') {
-                btnPrincipal = `<button onclick="alert('Redirecionando para o Gateway de pagamento do anunciante...')" class="flex-1 py-4 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-bold flex items-center justify-center gap-2 transition-colors"><i class="fas fa-shopping-cart"></i> Comprar (R$ ${p.preco})</button>`;
+            if(count === 0) {
+                container.innerHTML = `<p class='text-slate-400 text-xs text-slate-400'>Nenhum comentário ainda. Seja o primeiro!</p>`;
             }
-
-            actions.innerHTML = btnWhats + btnPrincipal;
-        };
+        }
 
         window.enviarComentario = async (postId) => {
             if(!currentUser) return alert("Você precisa fazer login para avaliar.");
@@ -591,8 +637,9 @@
                 data: serverTimestamp()
             });
 
-            alert("Avaliação enviada!");
-            abrirModal(postId); // Atualiza o modal
+            document.getElementById('inputComentario').value = "";
+            alert("Comentário enviado com sucesso!");
+            carregarComentariosModal(postId);
         };
 
         window.fecharModal = () => document.getElementById('postModal').classList.add('hidden');
