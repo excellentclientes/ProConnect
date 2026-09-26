@@ -74,9 +74,11 @@
             <!-- Tab Início -->
             <div id="adv-dashboard" class="tab-content block max-w-4xl mx-auto space-y-6">
                 <h2 class="text-2xl font-bold">Bem-vindo, <span id="advName">Anunciante</span></h2>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm"><p class="text-slate-500 text-sm">Visualizações</p><h3 class="text-3xl font-bold mt-2">--</h3></div>
-                    <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm"><p class="text-slate-500 text-sm">Avaliações Médias</p><h3 class="text-3xl font-bold mt-2 text-yellow-500"><i class="fas fa-star text-xl"></i> --</h3></div>
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                    <h3 class="text-lg font-bold mb-4">Suas Publicações e Comentários</h3>
+                    <div id="meusAnunciosLista" class="space-y-4">
+                        <p class="text-slate-400 text-sm">Carregando seus anúncios...</p>
+                    </div>
                 </div>
             </div>
 
@@ -109,20 +111,24 @@
                     <div><label class="block text-sm font-medium text-slate-700 mb-1">Descrição</label><textarea id="postDesc" required rows="4" class="w-full border border-slate-300 rounded-lg px-4 py-3 outline-none focus:border-blue-500"></textarea></div>
 
                     <div class="p-5 bg-slate-50 rounded-xl border border-slate-200 space-y-4">
-                        <div>
-                            <label class="block text-sm font-medium text-slate-700 mb-1">Tipo de Solução</label>
-                            <select id="postTipo" class="w-full border border-slate-300 rounded-lg px-4 py-3 outline-none bg-white">
-                                <option value="servico">Divulgação de Serviço</option>
-                                <option value="gratis">Produto Digital (Download Grátis)</option>
-                                <option value="pago" id="optPago" disabled>Produto Digital (Venda) - Requer Gateway configurado</option>
-                            </select>
-                            <p id="avisoGateway" class="text-xs text-red-500 mt-2 hidden">Você precisa configurar a chave do Gateway nas configurações para vender.</p>
-                        </div>
-                        <div id="divPreco" class="hidden">
-                            <label class="block text-sm font-medium text-slate-700 mb-1">Preço (R$)</label>
-                            <input type="number" id="postPreco" step="0.01" class="w-full border border-slate-300 rounded-lg px-4 py-3 outline-none">
-                        </div>
-                    </div>
+    <div>
+        <label class="block text-sm font-medium text-slate-700 mb-1">Tipo de Solução</label>
+        <select id="postTipo" class="w-full border border-slate-300 rounded-lg px-4 py-3 outline-none bg-white">
+            <option value="servico">Divulgação de Serviço</option>
+            <option value="gratis">Produto Digital (Download Grátis)</option>
+            <option value="pago" id="optPago" disabled>Produto Digital (Venda) - Requer Gateway configurado</option>
+        </select>
+        <p id="avisoGateway" class="text-xs text-red-500 mt-2 hidden">Você precisa configurar a chave do Gateway nas configurações para vender.</p>
+    </div>
+    <div id="divPreco" class="hidden">
+        <label class="block text-sm font-medium text-slate-700 mb-1">Preço (R$)</label>
+        <input type="number" id="postPreco" step="0.01" class="w-full border border-slate-300 rounded-lg px-4 py-3 outline-none">
+    </div>
+    <div id="divArquivo" class="hidden">
+        <label class="block text-sm font-medium text-slate-700 mb-1">Arquivo para Download (Qualquer formato)</label>
+        <input type="file" id="postArquivo" class="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700">
+    </div>
+</div>
 
                     <div>
                         <label class="block text-sm font-medium text-slate-700 mb-1">Imagem de Capa (Obrigatório)</label>
@@ -275,6 +281,18 @@
                         document.getElementById('avisoGateway').classList.remove('hidden');
                     }
                 }
+            if(user.email !== ADMIN_EMAIL) {
+                    document.getElementById('advName').innerText = user.displayName;
+                    carregarMeusAnuncios(); // Adiciona esta linha para carregar a gestão do anunciante
+                    if(userData.gatewayKey) {
+                        document.getElementById('advGatewayKey').value = userData.gatewayKey;
+                        document.getElementById('optPago').removeAttribute('disabled');
+                        document.getElementById('avisoGateway').classList.add('hidden');
+                    } else {
+                        document.getElementById('optPago').setAttribute('disabled', 'true');
+                        document.getElementById('avisoGateway').classList.remove('hidden');
+                    }
+                }
             } else {
                 btnLogin.classList.remove('hidden');
                 btnLogout.classList.add('hidden');
@@ -294,8 +312,17 @@
 
         document.getElementById('postTipo').addEventListener('change', (e) => {
             const divPreco = document.getElementById('divPreco');
-            if(e.target.value === 'pago') divPreco.classList.remove('hidden');
-            else divPreco.classList.add('hidden');
+            const divArquivo = document.getElementById('divArquivo');
+            if(e.target.value === 'pago') {
+                divPreco.classList.remove('hidden');
+                divArquivo.classList.remove('hidden');
+            } else if(e.target.value === 'gratis') {
+                divPreco.classList.add('hidden');
+                divArquivo.classList.remove('hidden');
+            } else {
+                divPreco.classList.add('hidden');
+                divArquivo.classList.add('hidden');
+            }
         });
 
         document.getElementById('formNovoAnuncio').addEventListener('submit', async (e) => {
@@ -316,6 +343,20 @@
                     canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
                     const imgBase64 = canvas.toDataURL('image/jpeg', 0.6);
 
+                    // Função para ler arquivo em Base64
+                    const arquivoInput = document.getElementById('postArquivo').files[0];
+                    let arquivoData = "";
+                    let arquivoNome = "";
+
+                    if(arquivoInput) {
+                        arquivoNome = arquivoInput.name;
+                        arquivoData = await new Promise((resolve) => {
+                            const r = new FileReader();
+                            r.onload = e => resolve(e.target.result);
+                            r.readAsDataURL(arquivoInput);
+                        });
+                    }
+
                     // Salvar no Banco
                     await addDoc(collection(db, "anuncios"), {
                         donoId: currentUser.uid,
@@ -326,6 +367,8 @@
                         tipo: document.getElementById('postTipo').value,
                         preco: document.getElementById('postPreco').value || 0,
                         imagem: imgBase64,
+                        arquivoData: arquivoData,
+                        arquivoNome: arquivoNome,
                         likes: 0,
                         data: serverTimestamp()
                     });
@@ -334,11 +377,78 @@
                     document.getElementById('formNovoAnuncio').reset();
                     btn.innerText = "Publicar Agora"; btn.disabled = false;
                     switchTab('adv-dashboard');
+                    carregarMeusAnuncios();
                 };
                 img.src = event.target.result;
             };
             reader.readAsDataURL(file);
         });
+
+        // Função para carregar os próprios anúncios e comentários no painel do anunciante
+        async function carregarMeusAnuncios() {
+            if(!currentUser) return;
+            const container = document.getElementById('meusAnunciosLista');
+            const { query, where } = await import("https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js");
+            
+            const q = query(collection(db, "anuncios"), where("donoId", "==", currentUser.uid));
+            const snap = await getDocs(q);
+            
+            container.innerHTML = "";
+            if(snap.empty) {
+                container.innerHTML = "<p class='text-slate-400 text-sm'>Você ainda não publicou nada.</p>";
+                return;
+            }
+
+            snap.forEach(async (docSnap) => {
+                const p = docSnap.data();
+                const id = docSnap.id;
+                
+                // Buscar comentários deste post
+                const commSnap = await getDocs(collection(db, `anuncios/${id}/comentarios`));
+                let comentariosHtml = "";
+                commSnap.forEach(c => {
+                    const cd = c.data();
+                    comentariosHtml += `<div class="bg-slate-50 p-2 rounded text-xs mt-1"><b>${cd.usuario}:</b> ${cd.texto} (${cd.nota}★)</div>`;
+                });
+
+                container.innerHTML += `
+                    <div class="border border-slate-200 rounded-xl p-4 flex flex-col gap-3">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <img src="${p.imagem}" class="w-12 h-12 object-cover rounded-lg">
+                                <div>
+                                    <h4 class="font-bold text-slate-800">${p.titulo}</h4>
+                                    <span class="text-xs bg-blue-50 text-blue-600 px-2 py-0.5 rounded uppercase font-semibold">${p.tipo}</span>
+                                </div>
+                            </div>
+                            <div class="flex gap-2">
+                                <button onclick="copiarLink('${id}')" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-lg"><i class="fas fa-share-alt"></i> Compartilhar Link</button>
+                                <button onclick="deletarAnuncio('${id}')" class="px-3 py-1.5 bg-red-50 hover:bg-red-100 text-red-600 text-xs font-semibold rounded-lg"><i class="fas fa-trash"></i> Excluir</button>
+                            </div>
+                        </div>
+                        <div class="border-t border-slate-100 pt-2">
+                            <p class="text-xs font-semibold text-slate-500 mb-1">Avaliações e Comentários:</p>
+                            ${comentariosHtml || '<p class="text-xs text-slate-400">Nenhum comentário ainda.</p>'}
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        window.copiarLink = (id) => {
+            const url = window.location.origin + window.location.pathname + "#post=" + id;
+            navigator.clipboard.writeText(url);
+            alert("Link copiado para a área de transferência!");
+        };
+
+        window.deletarAnuncio = async (id) => {
+            if(confirm("Tem certeza que deseja excluir esta publicação?")) {
+                const { deleteDoc } = await import("https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js");
+                await deleteDoc(doc(db, "anuncios", id));
+                alert("Publicado excluída com sucesso!");
+                carregarMeusAnuncios();
+            }
+        };
 
         // ==========================================
         // LÓGICA DO ADMIN
@@ -418,31 +528,71 @@
             if(!snap.exists()) return;
             const p = snap.data();
 
+            // Buscar comentarios do banco
+            const commSnap = await getDocs(collection(db, `anuncios/${postId}/comentarios`));
+            let listaComentariosHtml = "";
+            commSnap.forEach(c => {
+                const cd = c.data();
+                listaComentariosHtml += `<div class="bg-slate-50 p-3 rounded-xl mb-2 text-sm"><div class="flex justify-between font-bold text-slate-700"><span>${cd.usuario}</span><span class="text-yellow-500">${cd.nota}★</span></div><p class="text-slate-600 mt-1">${cd.texto}</p></div>`;
+            });
+
             content.innerHTML = `
                 <img src="${p.imagem}" class="w-full h-72 object-cover">
-                <div class="p-8">
-                    <h2 class="text-3xl font-bold mb-4">${p.titulo}</h2>
-                    <p class="text-slate-600 whitespace-pre-wrap leading-relaxed">${p.descricao}</p>
+                <div class="p-8 space-y-6">
+                    <div>
+                        <h2 class="text-3xl font-bold mb-2">${p.titulo}</h2>
+                        <p class="text-slate-600 whitespace-pre-wrap leading-relaxed">${p.descricao}</p>
+                    </div>
                     
-                    <div class="mt-8 pt-8 border-t border-slate-200">
-                        <h3 class="font-bold text-lg mb-4">Avaliações</h3>
-                        <div class="flex items-center gap-2 mb-6">
-                            <div class="flex text-yellow-400 text-xl"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
-                            <span class="text-slate-500 text-sm">(Sistema de avaliação interativo)</span>
+                    <div class="pt-6 border-t border-slate-200">
+                        <h3 class="font-bold text-lg mb-4">Deixe sua Avaliação e Comentário</h3>
+                        <div class="space-y-3">
+                            <select id="inputNota" class="w-full border border-slate-200 rounded-lg p-3 text-sm outline-none bg-white">
+                                <option value="5">5 Estrelas - Excelente</option>
+                                <option value="4">4 Estrelas - Muito Bom</option>
+                                <option value="3">3 Estrelas - Regular</option>
+                                <option value="2">2 Estrelas - Ruim</option>
+                                <option value="1">1 Estrela - Péssimo</option>
+                            </select>
+                            <textarea id="inputComentario" class="w-full border border-slate-200 rounded-lg p-4 text-sm outline-none" rows="3" placeholder="Escreva seu depoimento..."></textarea>
+                            <button onclick="enviarComentario('${postId}')" class="px-6 py-2.5 bg-slate-900 text-white rounded-lg text-sm font-semibold hover:bg-slate-800">Enviar Comentário</button>
                         </div>
-                        <textarea class="w-full border border-slate-200 rounded-lg p-4 text-sm outline-none" rows="3" placeholder="Deixe um comentário..."></textarea>
+
+                        <div class="mt-6 space-y-2">
+                            <h4 class="font-semibold text-sm text-slate-500">Comentários da Comunidade:</h4>
+                            <div id="containerComentarios">${listaComentariosHtml || '<p class="text-slate-400 text-sm">Seja o primeiro a avaliar!</p>'}</div>
+                        </div>
                     </div>
                 </div>
             `;
 
-            // Construir Botões de Ação
             let btnWhats = p.whatsapp ? `<a href="https://wa.me/${p.whatsapp}" target="_blank" class="flex-1 py-4 bg-green-500 hover:bg-green-600 text-white text-center rounded-xl font-bold flex items-center justify-center gap-2 transition-colors"><i class="fab fa-whatsapp text-xl"></i> Contato</a>` : '';
             
             let btnPrincipal = "";
-            if(p.tipo === 'gratis') btnPrincipal = `<button class="flex-1 py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold flex items-center justify-center gap-2 transition-colors"><i class="fas fa-download"></i> Baixar Grátis</button>`;
-            else if(p.tipo === 'pago') btnPrincipal = `<button class="flex-1 py-4 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-bold flex items-center justify-center gap-2 transition-colors"><i class="fas fa-shopping-cart"></i> Comprar (R$ ${p.preco})</button>`;
+            if(p.tipo === 'gratis') {
+                btnPrincipal = p.arquivoData ? `<a href="${p.arquivoData}" download="${p.arquivoNome || 'arquivo'}" class="flex-1 py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold flex items-center justify-center gap-2 transition-colors text-center"><i class="fas fa-download"></i> Baixar Arquivo</a>` : `<button onclick="alert('Nenhum arquivo anexado')" class="flex-1 py-4 bg-slate-300 text-slate-600 rounded-xl font-bold">Sem arquivo</button>`;
+            } else if(p.tipo === 'pago') {
+                btnPrincipal = `<button onclick="alert('Redirecionando para o Gateway de pagamento do anunciante...')" class="flex-1 py-4 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-bold flex items-center justify-center gap-2 transition-colors"><i class="fas fa-shopping-cart"></i> Comprar (R$ ${p.preco})</button>`;
+            }
 
             actions.innerHTML = btnWhats + btnPrincipal;
+        };
+
+        window.enviarComentario = async (postId) => {
+            if(!currentUser) return alert("Você precisa fazer login para avaliar.");
+            const nota = document.getElementById('inputNota').value;
+            const texto = document.getElementById('inputComentario').value;
+            if(!texto) return alert("Escreva um comentário.");
+
+            await addDoc(collection(db, `anuncios/${postId}/comentarios`), {
+                usuario: currentUser.displayName,
+                nota: nota,
+                texto: texto,
+                data: serverTimestamp()
+            });
+
+            alert("Avaliação enviada!");
+            abrirModal(postId); // Atualiza o modal
         };
 
         window.fecharModal = () => document.getElementById('postModal').classList.add('hidden');
