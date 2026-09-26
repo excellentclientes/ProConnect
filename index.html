@@ -7,28 +7,28 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
         body { font-family: 'Inter', sans-serif; background-color: #F8FAFC; }
         
-        /* Oculta scrollbar mas mantém scroll */
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         
-        .glass-modal { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); }
+        /* Efeito futurista / Glassmorphism */
+        .glass-panel { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.5); }
+        .modern-shadow { box-shadow: 0 20px 40px -15px rgba(0,0,0,0.05); }
     </style>
 </head>
 <body class="text-slate-800 antialiased overflow-x-hidden">
 
     <!-- NAVBAR PRINCIPAL -->
-    <nav class="fixed top-0 w-full bg-white/80 backdrop-blur-md border-b border-slate-200 z-40 h-16 flex items-center justify-between px-6 md:px-12 transition-all">
+    <nav class="fixed top-0 w-full glass-panel z-40 h-16 flex items-center justify-between px-6 md:px-12 transition-all shadow-sm">
         <div class="flex items-center gap-2 cursor-pointer" onclick="showView('feed')">
-            <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold"><i class="fas fa-link"></i></div>
-            <h1 class="text-xl font-bold tracking-tight text-slate-900">Pro<span class="text-blue-600">Connect</span></h1>
+            <div class="w-8 h-8 bg-blue-600 rounded-xl flex items-center justify-center text-white font-bold shadow-lg shadow-blue-500/30"><i class="fas fa-link"></i></div>
+            <h1 class="text-xl font-extrabold tracking-tight text-slate-900">Pro<span class="text-blue-600">Connect</span></h1>
         </div>
         
         <div class="flex items-center gap-4">
-            <button id="btnNavPanel" class="hidden text-sm font-medium text-slate-600 hover:text-blue-600 transition-colors" onclick="goToPanel()">Meu Painel</button>
-            <button id="btnPerfil" class="hidden text-sm font-medium text-slate-600 hover:text-blue-600 transition-colors" onclick="abrirPerfil()"><i class="fas fa-user-edit"></i> Perfil</button>
+            <button id="btnNavPanel" class="hidden text-sm font-semibold text-slate-600 hover:text-blue-600 transition-colors" onclick="goToPanel()">Meu Painel</button>
             <button id="btnLogin" class="px-5 py-2 bg-slate-900 hover:bg-slate-800 text-white text-sm font-medium rounded-full transition-all flex items-center gap-2 shadow-md">
                 <i class="fab fa-google"></i> Login
             </button>
@@ -43,107 +43,185 @@
     <!-- ========================================== -->
     <main id="view-feed" class="pt-24 pb-12 px-6 md:px-12 max-w-7xl mx-auto block">
         <div class="text-center max-w-2xl mx-auto mb-12">
-            <h2 class="text-3xl md:text-5xl font-bold text-slate-900 mb-4 tracking-tight">Descubra soluções para o seu negócio</h2>
+            <h2 class="text-3xl md:text-5xl font-extrabold text-slate-900 mb-4 tracking-tight">Descubra soluções para o seu negócio</h2>
             <p class="text-slate-500 text-lg">Serviços premium, sistemas prontos e produtos digitais criados por profissionais.</p>
         </div>
 
-        <!-- Grade de Anúncios -->
         <div id="feedGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <!-- Anúncios serão injetados aqui via JS -->
             <div class="text-center col-span-full py-12 text-slate-400">Carregando soluções...</div>
         </div>
     </main>
 
     <!-- ========================================== -->
-    <!-- VISÃO 2: PAINEL DO ANUNCIANTE (CREATOR)    -->
+    <!-- VISÃO 2: PÁGINA DO ANÚNCIO (FUTURISTA)     -->
+    <!-- ========================================== -->
+    <main id="view-post" class="hidden pt-24 pb-12 px-4 md:px-8 max-w-7xl mx-auto min-h-screen">
+        <button onclick="showView('feed')" class="mb-6 text-sm font-semibold text-slate-500 hover:text-slate-900 transition flex items-center gap-2"><i class="fas fa-arrow-left"></i> Voltar ao Feed</button>
+        
+        <div class="bg-white rounded-[2rem] modern-shadow border border-slate-100 overflow-hidden flex flex-col lg:flex-row min-h-[70vh]">
+            <!-- Coluna Esquerda: Imagem e Descrição -->
+            <div class="lg:w-3/5 bg-slate-50/50 p-6 md:p-10 flex flex-col border-b lg:border-b-0 lg:border-r border-slate-100 relative">
+                <div class="w-full bg-white rounded-2xl overflow-hidden flex items-center justify-center border border-slate-100 shadow-sm mb-8 relative group min-h-[300px]">
+                    <img id="postPageImg" src="" class="w-full max-h-[500px] object-contain transition-transform duration-700 group-hover:scale-105">
+                </div>
+                <div class="flex-1">
+                    <h2 id="postPageTitulo" class="text-3xl md:text-4xl font-extrabold text-slate-900 mb-4 tracking-tight leading-tight"></h2>
+                    <p id="postPageDesc" class="text-slate-600 whitespace-pre-wrap leading-relaxed text-lg"></p>
+                </div>
+            </div>
+
+            <!-- Coluna Direita: Ações, Avaliação e Comentários -->
+            <div class="lg:w-2/5 p-6 md:p-10 flex flex-col bg-white">
+                <div class="space-y-8 flex-1">
+                    <!-- Botões Principais -->
+                    <div id="postPageActions" class="flex flex-col gap-3">
+                        <!-- Injetados via JS -->
+                    </div>
+
+                    <hr class="border-slate-100">
+
+                    <!-- Área de Avaliação 6 Estrelas -->
+                    <div class="bg-slate-50 rounded-2xl p-6 border border-slate-100">
+                        <h3 class="font-bold text-slate-800 mb-2">Avalie esta solução</h3>
+                        <div id="starContainer" class="flex items-center gap-2 text-slate-200 text-3xl cursor-pointer mb-4">
+                            <i class="fas fa-star star-btn hover:scale-110 transition-transform" onclick="setNota(1)"></i>
+                            <i class="fas fa-star star-btn hover:scale-110 transition-transform" onclick="setNota(2)"></i>
+                            <i class="fas fa-star star-btn hover:scale-110 transition-transform" onclick="setNota(3)"></i>
+                            <i class="fas fa-star star-btn hover:scale-110 transition-transform" onclick="setNota(4)"></i>
+                            <i class="fas fa-star star-btn hover:scale-110 transition-transform" onclick="setNota(5)"></i>
+                            <i class="fas fa-star star-btn hover:scale-110 transition-transform" onclick="setNota(6)"></i>
+                        </div>
+                        <input type="hidden" id="inputNota" value="6">
+                        <textarea id="inputComentario" class="w-full bg-white border border-slate-200 rounded-xl p-4 text-sm outline-none focus:ring-2 focus:ring-blue-500 mb-3 transition-shadow" rows="3" placeholder="Compartilhe sua experiência..."></textarea>
+                        <button id="btnEnviarComentario" class="w-full py-3 bg-slate-900 text-white rounded-xl text-sm font-bold hover:bg-slate-800 transition-colors shadow-lg shadow-slate-900/20">Publicar Avaliação</button>
+                    </div>
+
+                    <!-- Comentários da Comunidade -->
+                    <div>
+                        <h4 class="font-bold text-sm text-slate-400 uppercase tracking-wider mb-4">Comentários Recentes</h4>
+                        <div id="containerComentarios" class="space-y-3 max-h-64 overflow-y-auto pr-2 no-scrollbar">
+                            <!-- Injetado via JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- ========================================== -->
+    <!-- VISÃO 3: PAINEL DO ANUNCIANTE (CREATOR)    -->
     <!-- ========================================== -->
     <main id="view-advertiser" class="hidden pt-16 h-screen flex">
-        <!-- Sidebar Anunciante -->
-        <aside class="w-64 bg-white border-r border-slate-200 flex flex-col pt-6 hidden md:flex">
-            <div class="px-6 mb-6">
-                <span class="text-xs font-bold text-blue-600 tracking-wider uppercase bg-blue-50 px-2 py-1 rounded">Painel Creator</span>
+        <aside class="w-64 bg-white border-r border-slate-200 flex flex-col pt-6 hidden md:flex z-10 shadow-[4px_0_24px_rgba(0,0,0,0.02)]">
+            <div class="px-6 mb-8">
+                <span class="text-xs font-bold text-blue-600 tracking-wider uppercase bg-blue-50 px-3 py-1.5 rounded-lg">Painel Creator</span>
             </div>
-            <nav class="flex-1 px-4 space-y-1">
-                <button onclick="switchTab('adv-dashboard')" class="tab-btn adv-dashboard w-full flex items-center gap-3 px-4 py-3 bg-slate-100 text-slate-900 rounded-lg font-medium text-left"><i class="fas fa-home w-5"></i> Início</button>
-                <button onclick="switchTab('adv-new')" class="tab-btn adv-new w-full flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-50 rounded-lg font-medium text-left transition-colors"><i class="fas fa-plus w-5"></i> Publicar</button>
-                <button onclick="switchTab('adv-config')" class="tab-btn adv-config w-full flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-50 rounded-lg font-medium text-left transition-colors"><i class="fas fa-cog w-5"></i> Configurações</button>
+            <nav class="flex-1 px-4 space-y-2">
+                <button onclick="switchTab('adv-dashboard')" class="tab-btn adv-dashboard w-full flex items-center gap-3 px-4 py-3 bg-slate-50 text-slate-900 rounded-xl font-semibold text-left transition-all"><i class="fas fa-home w-5"></i> Início</button>
+                <button onclick="switchTab('adv-new')" class="tab-btn adv-new w-full flex items-center gap-3 px-4 py-3 text-slate-500 hover:bg-slate-50 hover:text-slate-900 rounded-xl font-semibold text-left transition-all"><i class="fas fa-plus w-5"></i> Publicar</button>
+                <button onclick="switchTab('adv-config')" class="tab-btn adv-config w-full flex items-center gap-3 px-4 py-3 text-slate-500 hover:bg-slate-50 hover:text-slate-900 rounded-xl font-semibold text-left transition-all"><i class="fas fa-cog w-5"></i> Pagamentos</button>
+                <button onclick="switchTab('adv-perfil')" class="tab-btn adv-perfil w-full flex items-center gap-3 px-4 py-3 text-slate-500 hover:bg-slate-50 hover:text-slate-900 rounded-xl font-semibold text-left transition-all"><i class="fas fa-user-edit w-5"></i> Meu Perfil</button>
             </nav>
         </aside>
 
-        <!-- Conteúdo Anunciante -->
-        <div class="flex-1 overflow-y-auto bg-slate-50 p-8">
+        <div class="flex-1 overflow-y-auto bg-slate-50/50 p-8">
             <!-- Tab Início -->
             <div id="adv-dashboard" class="tab-content block max-w-4xl mx-auto space-y-6">
-                <h2 class="text-2xl font-bold">Bem-vindo, <span id="advName">Anunciante</span></h2>
-                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-                    <h3 class="text-lg font-bold mb-4">Suas Publicações e Comentários</h3>
+                <h2 class="text-3xl font-extrabold tracking-tight">Bem-vindo, <span id="advName" class="text-blue-600">Anunciante</span></h2>
+                <div class="bg-white p-8 rounded-[2rem] border border-slate-100 modern-shadow">
+                    <h3 class="text-xl font-bold mb-6">Suas Publicações</h3>
                     <div id="meusAnunciosLista" class="space-y-4">
                         <p class="text-slate-400 text-sm">Carregando seus anúncios...</p>
                     </div>
                 </div>
             </div>
 
-            <!-- Tab Configurações (API GATEWAY) -->
+            <!-- Tab Meu Perfil -->
+            <div id="adv-perfil" class="tab-content hidden max-w-4xl mx-auto space-y-6">
+                <div class="bg-white p-8 rounded-[2rem] border border-slate-100 modern-shadow">
+                    <h2 class="text-2xl font-bold mb-8 text-slate-900">Aparência do seu Perfil</h2>
+                    <div class="space-y-8">
+                        <div class="flex flex-col sm:flex-row items-center gap-8 bg-slate-50 p-8 rounded-2xl border border-slate-100">
+                            <!-- Preview Circular -->
+                            <div class="relative w-32 h-32 rounded-full overflow-hidden border-4 border-white shadow-xl flex-shrink-0 bg-slate-200">
+                                <img id="previewFotoTab" src="" class="w-full h-full object-cover">
+                            </div>
+                            <div class="flex-1 w-full">
+                                <label class="block text-sm font-bold text-slate-700 mb-3">Foto de Perfil</label>
+                                <input type="file" id="inputFotoTab" accept="image/*" class="w-full text-sm text-slate-500 file:mr-4 file:py-3 file:px-6 file:rounded-xl file:border-0 file:text-sm file:font-bold file:bg-blue-600 file:text-white hover:file:bg-blue-700 transition-all cursor-pointer">
+                                <p class="text-xs text-slate-500 mt-3">Ajuste como os clientes verão você nos anúncios da plataforma.</p>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-bold text-slate-700 mb-2">Nome de Exibição</label>
+                            <input type="text" id="inputNomeTab" class="w-full border border-slate-200 rounded-xl px-5 py-4 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-50 transition-all font-medium">
+                        </div>
+                        <button onclick="salvarPerfilTab()" id="btnSalvarPerfilTab" class="w-full py-4 bg-slate-900 text-white rounded-xl font-bold hover:bg-slate-800 transition-all shadow-lg shadow-slate-900/20">Atualizar Perfil e Publicações</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab Configurações -->
             <div id="adv-config" class="tab-content hidden max-w-4xl mx-auto space-y-6">
-                <div class="bg-white p-8 rounded-2xl border border-slate-200 shadow-sm">
-                    <h2 class="text-xl font-bold mb-2">Configurações de Pagamento</h2>
-                    <p class="text-slate-500 text-sm mb-6">Para vender produtos pagos na plataforma, você precisa configurar seu Gateway (ex: Mercado Pago).</p>
+                <div class="bg-white p-8 rounded-[2rem] border border-slate-100 modern-shadow">
+                    <h2 class="text-2xl font-bold mb-2">Gateway de Pagamento</h2>
+                    <p class="text-slate-500 text-sm mb-8">Conecte sua conta para vender produtos digitais pagos de forma automática.</p>
                     
                     <div class="space-y-4">
                         <div>
-                            <label class="block text-sm font-medium text-slate-700 mb-1">Chave Pública (Public Key) do Gateway</label>
-                            <input type="text" id="advGatewayKey" class="w-full border border-slate-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 outline-none" placeholder="APP_USR-...">
+                            <label class="block text-sm font-bold text-slate-700 mb-2">Chave Pública (Public Key)</label>
+                            <input type="text" id="advGatewayKey" class="w-full border border-slate-200 rounded-xl px-5 py-4 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-50 transition-all font-medium" placeholder="APP_USR-...">
                         </div>
-                        <button onclick="salvarConfigAnunciante()" class="px-6 py-2.5 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700">Salvar Configurações</button>
+                        <button onclick="salvarConfigAnunciante()" class="px-8 py-3.5 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 shadow-lg shadow-blue-500/30 transition-all">Salvar Chave</button>
                     </div>
                 </div>
             </div>
 
             <!-- Tab Novo Anúncio -->
             <div id="adv-new" class="tab-content hidden max-w-4xl mx-auto space-y-6">
-                <form id="formNovoAnuncio" class="bg-white p-8 rounded-2xl border border-slate-200 shadow-sm space-y-6">
-                    <h2 class="text-xl font-bold border-b border-slate-100 pb-4">Criar nova publicação</h2>
+                <form id="formNovoAnuncio" class="bg-white p-8 rounded-[2rem] border border-slate-100 modern-shadow space-y-8">
+                    <h2 class="text-2xl font-bold border-b border-slate-100 pb-6">Criar nova publicação</h2>
                     
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div><label class="block text-sm font-medium text-slate-700 mb-1">Título</label><input type="text" id="postTitulo" required class="w-full border border-slate-300 rounded-lg px-4 py-3 outline-none focus:border-blue-500"></div>
-                        <div><label class="block text-sm font-medium text-slate-700 mb-1">WhatsApp (Opcional)</label><input type="text" id="postWhats" placeholder="5511999999999" class="w-full border border-slate-300 rounded-lg px-4 py-3 outline-none focus:border-blue-500"></div>
+                        <div><label class="block text-sm font-bold text-slate-700 mb-2">Título do Anúncio</label><input type="text" id="postTitulo" required class="w-full border border-slate-200 rounded-xl px-5 py-4 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-50 font-medium"></div>
+                        <div><label class="block text-sm font-bold text-slate-700 mb-2">WhatsApp (Contato)</label><input type="text" id="postWhats" placeholder="5511999999999" class="w-full border border-slate-200 rounded-xl px-5 py-4 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-50 font-medium"></div>
                     </div>
                     
-                    <div><label class="block text-sm font-medium text-slate-700 mb-1">Descrição</label><textarea id="postDesc" required rows="4" class="w-full border border-slate-300 rounded-lg px-4 py-3 outline-none focus:border-blue-500"></textarea></div>
+                    <div><label class="block text-sm font-bold text-slate-700 mb-2">Descrição Completa</label><textarea id="postDesc" required rows="5" class="w-full border border-slate-200 rounded-xl px-5 py-4 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-50 font-medium"></textarea></div>
 
-                    <div class="p-5 bg-slate-50 rounded-xl border border-slate-200 space-y-4">
-    <div>
-        <label class="block text-sm font-medium text-slate-700 mb-1">Tipo de Solução</label>
-        <select id="postTipo" class="w-full border border-slate-300 rounded-lg px-4 py-3 outline-none bg-white">
-            <option value="servico">Divulgação de Serviço</option>
-            <option value="gratis">Produto Digital (Download Grátis)</option>
-            <option value="pago" id="optPago" disabled>Produto Digital (Venda) - Requer Gateway configurado</option>
-        </select>
-        <p id="avisoGateway" class="text-xs text-red-500 mt-2 hidden">Você precisa configurar a chave do Gateway nas configurações para vender.</p>
-    </div>
-    <div id="divPreco" class="hidden">
-        <label class="block text-sm font-medium text-slate-700 mb-1">Preço (R$)</label>
-        <input type="number" id="postPreco" step="0.01" class="w-full border border-slate-300 rounded-lg px-4 py-3 outline-none">
-    </div>
-    <div id="divArquivo" class="hidden">
-        <label class="block text-sm font-medium text-slate-700 mb-1">Arquivo para Download (Qualquer formato)</label>
-        <input type="file" id="postArquivo" class="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700">
-    </div>
-</div>
-
-                    <div>
-                        <label class="block text-sm font-medium text-slate-700 mb-1">Imagem de Capa (Obrigatório)</label>
-                        <input type="file" id="postImg" accept="image/*" required class="block w-full text-sm text-slate-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700">
+                    <div class="p-6 bg-slate-50 rounded-2xl border border-slate-100 space-y-5">
+                        <div>
+                            <label class="block text-sm font-bold text-slate-700 mb-2">Formato de Entrega</label>
+                            <select id="postTipo" class="w-full border border-slate-200 rounded-xl px-5 py-4 outline-none bg-white focus:border-blue-500 font-medium cursor-pointer">
+                                <option value="servico">Apenas Divulgação de Serviço</option>
+                                <option value="gratis">Produto Digital (Download Grátis)</option>
+                                <option value="pago" id="optPago" disabled>Produto Digital (Venda) - Requer Gateway</option>
+                            </select>
+                            <p id="avisoGateway" class="text-xs text-red-500 font-semibold mt-3 hidden"><i class="fas fa-exclamation-circle"></i> Configure a chave do Gateway na aba Pagamentos para vender.</p>
+                        </div>
+                        <div id="divPreco" class="hidden">
+                            <label class="block text-sm font-bold text-slate-700 mb-2">Preço (R$)</label>
+                            <input type="number" id="postPreco" step="0.01" class="w-full border border-slate-200 rounded-xl px-5 py-4 outline-none focus:border-blue-500 font-medium">
+                        </div>
+                        <div id="divArquivo" class="hidden">
+                            <label class="block text-sm font-bold text-slate-700 mb-2">Anexar Arquivo para Download</label>
+                            <input type="file" id="postArquivo" class="w-full text-sm text-slate-500 file:mr-4 file:py-3 file:px-6 file:rounded-xl file:border-0 file:text-sm file:font-bold file:bg-blue-100 file:text-blue-700 hover:file:bg-blue-200 cursor-pointer">
+                        </div>
                     </div>
 
-                    <button type="submit" id="btnSalvarPost" class="w-full py-4 bg-slate-900 text-white rounded-xl font-medium hover:bg-slate-800 transition-colors shadow-lg">Publicar Agora</button>
+                    <div>
+                        <label class="block text-sm font-bold text-slate-700 mb-2">Imagem de Capa (Obrigatório)</label>
+                        <input type="file" id="postImg" accept="image/*" required class="block w-full text-sm text-slate-500 file:mr-4 file:py-3 file:px-6 file:rounded-xl file:border-0 file:text-sm file:font-bold file:bg-slate-100 file:text-slate-700 hover:file:bg-slate-200 cursor-pointer">
+                    </div>
+
+                    <button type="submit" id="btnSalvarPost" class="w-full py-4 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition-all shadow-lg shadow-blue-500/30 text-lg">Publicar Agora</button>
                 </form>
             </div>
         </div>
     </main>
 
     <!-- ========================================== -->
-    <!-- VISÃO 3: PAINEL DE GESTÃO (ADMIN)          -->
+    <!-- VISÃO 4: PAINEL DE GESTÃO (ADMIN)          -->
     <!-- ========================================== -->
     <main id="view-admin" class="hidden pt-16 h-screen flex">
         <aside class="w-64 bg-slate-900 text-white flex flex-col pt-6 hidden md:flex">
@@ -155,8 +233,6 @@
         
         <div class="flex-1 overflow-y-auto bg-slate-50 p-8">
             <div class="max-w-5xl mx-auto space-y-8">
-                
-                <!-- Token Admin -->
                 <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
                     <h2 class="text-xl font-bold mb-4">Cobrança da Plataforma</h2>
                     <div class="flex gap-4">
@@ -164,15 +240,11 @@
                         <button onclick="salvarTokenAdmin()" class="px-6 py-2 bg-slate-900 text-white rounded-lg font-medium">Salvar Token</button>
                     </div>
                 </div>
-
-                <!-- Lista de Assinantes -->
                 <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
                     <div class="p-6 border-b border-slate-200 bg-slate-50 flex justify-between"><h3 class="font-bold text-lg">Anunciantes Cadastrados</h3></div>
                     <table class="w-full text-left border-collapse">
                         <thead><tr class="border-b border-slate-200 text-sm text-slate-500"><th class="p-4">Usuário / Email</th><th class="p-4">WhatsApp</th></tr></thead>
-                        <tbody id="listaAdminUsers" class="text-sm text-slate-600">
-                            <!-- Injetado via JS -->
-                        </tbody>
+                        <tbody id="listaAdminUsers" class="text-sm text-slate-600"></tbody>
                     </table>
                 </div>
             </div>
@@ -180,119 +252,39 @@
     </main>
 
     <!-- ========================================== -->
-    <!-- SUBPÁGINA / MODAL DE DETALHES (2 COLUNAS)  -->
-    <!-- ========================================== -->
-    <div id="postModal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 md:p-6 overflow-y-auto">
-        <div class="bg-white w-full max-w-6xl rounded-2xl shadow-2xl overflow-hidden relative flex flex-col max-h-[92vh]">
-            <!-- Botão Fechar -->
-            <button onclick="fecharModal()" class="absolute top-4 right-4 w-10 h-10 bg-slate-100 hover:bg-slate-200 rounded-full flex items-center justify-center text-slate-700 z-20 transition-colors shadow-md">
-                <i class="fas fa-times text-lg"></i>
-            </button>
-            
-            <!-- Grid de 2 Colunas (Subpágina Imersiva) -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 flex-1 overflow-y-auto">
-                <!-- Coluna Esquerda: Imagem sem cortes e Descrição -->
-                <div class="p-6 md:p-8 border-b lg:border-b-0 lg:border-r border-slate-200 space-y-6 flex flex-col bg-slate-50/30">
-                    <div class="w-full bg-slate-100 rounded-xl overflow-hidden flex items-center justify-center border border-slate-200">
-                        <img id="modalImg" src="" class="w-full max-h-[400px] object-contain">
-                    </div>
-                    <div class="space-y-3">
-                        <h2 id="modalTitulo" class="text-2xl md:text-3xl font-bold text-slate-900"></h2>
-                        <p id="modalDesc" class="text-slate-600 whitespace-pre-wrap leading-relaxed text-sm md:text-base"></p>
-                    </div>
-                </div>
-
-                <!-- Coluna Direita: Ações, Avaliações e Comentários -->
-                <div class="p-6 md:p-8 flex flex-col justify-between space-y-6 bg-white">
-                    <div class="space-y-6">
-                        <!-- Botões de Ação (Whats, Download/Compra) -->
-                        <div id="modalActions" class="flex flex-col sm:flex-row gap-3">
-                            <!-- Injetado dinamicamente via JS -->
-                        </div>
-
-                        <!-- Caixa de Avaliação -->
-                        <div class="bg-slate-50 p-5 rounded-xl border border-slate-200 space-y-3">
-                            <h3 class="font-bold text-sm text-slate-800">Avalie este produto/serviço</h3>
-                            <select id="inputNota" class="w-full border border-slate-200 rounded-lg p-2.5 text-sm outline-none bg-white">
-                                <option value="5">5 Estrelas - Excelente</option>
-                                <option value="4">4 Estrelas - Muito Bom</option>
-                                <option value="3">3 Estrelas - Regular</option>
-                                <option value="2">2 Estrelas - Ruim</option>
-                                <option value="1">1 Estrela - Péssimo</option>
-                            </select>
-                            <textarea id="inputComentario" class="w-full border border-slate-200 rounded-lg p-3 text-sm outline-none bg-white" rows="2" placeholder="Escreva um comentário..."></textarea>
-                            <button id="btnEnviarComentario" class="w-full py-2.5 bg-slate-900 text-white rounded-lg text-sm font-semibold hover:bg-slate-800 transition-colors">Enviar Avaliação</button>
-                        </div>
-
-                        <!-- Comentários da Comunidade -->
-                        <div class="space-y-2">
-                            <h4 class="font-semibold text-xs text-slate-400 uppercase tracking-wider">Comentários anteriores:</h4>
-                            <div id="containerComentarios" class="space-y-2 max-h-40 overflow-y-auto pr-1">
-                                <!-- Injetado via JS -->
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-
-    <!-- ========================================== -->
-    <!-- MODAL DE EDIÇÃO DE PERFIL                  -->
-    <!-- ========================================== -->
-    <div id="perfilModal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
-        <div class="bg-white w-full max-w-sm rounded-2xl shadow-2xl p-6 relative">
-            <button onclick="fecharPerfil()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600"><i class="fas fa-times text-lg"></i></button>
-            <h2 class="text-xl font-bold mb-6 text-slate-800">Seu Perfil</h2>
-            
-            <div class="space-y-5">
-                <div class="flex flex-col items-center gap-3">
-                    <img id="previewFoto" src="" class="w-24 h-24 rounded-full object-cover border-4 border-slate-100 shadow-sm">
-                    <input type="file" id="inputFotoPerfil" accept="image/*" class="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
-                </div>
-                
-                <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-1">Nome de Exibição</label>
-                    <input type="text" id="inputNomePerfil" class="w-full border border-slate-300 rounded-lg px-4 py-2.5 outline-none focus:border-blue-500">
-                </div>
-                
-                <button onclick="salvarPerfil()" id="btnSalvarPerfil" class="w-full py-3 bg-slate-900 text-white rounded-lg font-bold hover:bg-slate-800 transition-colors shadow-md">Salvar e Atualizar Publicações</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- ========================================== -->
     <!-- LÓGICA DO SISTEMA (JavaScript)             -->
     <!-- ========================================== -->
     <script type="module">
         import { app, db, auth, provider, signInWithPopup, signOut, onAuthStateChanged, ADMIN_EMAIL } from './firebase-config.js';
-        import { collection, addDoc, getDocs, doc, setDoc, getDoc, serverTimestamp, updateDoc, writeBatch, query, where } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { collection, addDoc, getDocs, doc, setDoc, getDoc, serverTimestamp, updateDoc, writeBatch, query, where, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
         import { updateProfile } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        // Variaveis globais de estado
+        
         let currentUser = null;
         let userData = null;
+        let postAtualId = null;
 
-        // Gerenciamento de Visualizações (Router Simples)
+        // Gerenciamento de Visualizações
         window.showView = (viewId) => {
             document.getElementById('view-feed').classList.add('hidden');
             document.getElementById('view-advertiser').classList.add('hidden');
             document.getElementById('view-admin').classList.add('hidden');
+            document.getElementById('view-post').classList.add('hidden');
             
             document.getElementById(`view-${viewId}`).classList.remove('hidden');
             if(viewId === 'feed') carregarFeed();
+            window.scrollTo(0, 0);
         };
 
         // Abas do Painel Anunciante
         window.switchTab = (tabId) => {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
             document.querySelectorAll('.tab-btn').forEach(el => {
-                el.classList.remove('bg-slate-100', 'text-slate-900');
-                el.classList.add('text-slate-600');
+                el.classList.remove('bg-slate-50', 'text-slate-900');
+                el.classList.add('text-slate-500');
             });
             document.getElementById(tabId).classList.remove('hidden');
-            document.querySelector(`.tab-btn.${tabId}`).classList.add('bg-slate-100', 'text-slate-900');
-            document.querySelector(`.tab-btn.${tabId}`).classList.remove('text-slate-600');
+            document.querySelector(`.tab-btn.${tabId}`).classList.add('bg-slate-50', 'text-slate-900');
+            document.querySelector(`.tab-btn.${tabId}`).classList.remove('text-slate-500');
         };
 
         // Autenticação
@@ -312,7 +304,6 @@
             }
         };
 
-        // Ouvinte de Estado da Sessão
         onAuthStateChanged(auth, async (user) => {
             currentUser = user;
             const btnLogin = document.getElementById('btnLogin');
@@ -323,33 +314,26 @@
                 btnLogin.classList.add('hidden');
                 btnLogout.classList.remove('hidden');
                 btnPanel.classList.remove('hidden');
-                document.getElementById('btnPerfil').classList.remove('hidden');
                 
-                // Salva/Recupera dados do usuário logado
                 const userRef = doc(db, "usuarios", user.uid);
                 const docSnap = await getDoc(userRef);
                 
                 if(docSnap.exists()) {
                     userData = docSnap.data();
                 } else {
-                    userData = { nome: user.displayName, email: user.email, gatewayKey: "", whatsapp: "" };
+                    userData = { nome: user.displayName, email: user.email, gatewayKey: "", whatsapp: "", fotoPerfil: "" };
                     await setDoc(userRef, userData);
                 }
 
                 if(user.email !== ADMIN_EMAIL) {
-                    document.getElementById('advName').innerText = user.displayName;
-                    if(userData.gatewayKey) {
-                        document.getElementById('advGatewayKey').value = userData.gatewayKey;
-                        document.getElementById('optPago').removeAttribute('disabled');
-                        document.getElementById('avisoGateway').classList.add('hidden');
-                    } else {
-                        document.getElementById('optPago').setAttribute('disabled', 'true');
-                        document.getElementById('avisoGateway').classList.remove('hidden');
-                    }
-                }
-            if(user.email !== ADMIN_EMAIL) {
-                    document.getElementById('advName').innerText = user.displayName;
-                    carregarMeusAnuncios(); // Adiciona esta linha para carregar a gestão do anunciante
+                    document.getElementById('advName').innerText = userData.nome || user.displayName;
+                    
+                    // Preenche dados da Aba Perfil
+                    document.getElementById('inputNomeTab').value = userData.nome || user.displayName;
+                    document.getElementById('previewFotoTab').src = userData.fotoPerfil || `https://ui-avatars.com/api/?name=${encodeURIComponent(userData.nome || user.displayName)}&background=random`;
+
+                    carregarMeusAnuncios();
+                    
                     if(userData.gatewayKey) {
                         document.getElementById('advGatewayKey').value = userData.gatewayKey;
                         document.getElementById('optPago').removeAttribute('disabled');
@@ -367,27 +351,93 @@
         });
 
         // ==========================================
-        // LÓGICA DO ANUNCIANTE
+        // LÓGICA DO NOVO PERFIL (Aba do Anunciante)
+        // ==========================================
+        document.getElementById('inputFotoTab').addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if(file) {
+                const reader = new FileReader();
+                reader.onload = (event) => document.getElementById('previewFotoTab').src = event.target.result;
+                reader.readAsDataURL(file);
+            }
+        });
+
+        window.salvarPerfilTab = async () => {
+            const btn = document.getElementById('btnSalvarPerfilTab');
+            btn.innerText = "Atualizando..."; btn.disabled = true;
+
+            const novoNome = document.getElementById('inputNomeTab').value;
+            const file = document.getElementById('inputFotoTab').files[0];
+            let novaFoto = userData.fotoPerfil || "";
+
+            if(file) {
+                novaFoto = await new Promise((resolve) => {
+                    const r = new FileReader();
+                    r.onload = e => {
+                        const img = new Image();
+                        img.onload = () => {
+                            const canvas = document.createElement('canvas');
+                            const size = 200; 
+                            canvas.width = size; canvas.height = size;
+                            const ctx = canvas.getContext('2d');
+                            const minSize = Math.min(img.width, img.height);
+                            const sx = (img.width - minSize) / 2;
+                            const sy = (img.height - minSize) / 2;
+                            ctx.drawImage(img, sx, sy, minSize, minSize, 0, 0, size, size);
+                            resolve(canvas.toDataURL('image/jpeg', 0.8));
+                        };
+                        img.src = e.target.result;
+                    };
+                    r.readAsDataURL(file);
+                });
+            }
+
+            try {
+                await updateProfile(currentUser, { displayName: novoNome });
+                userData.nome = novoNome;
+                userData.fotoPerfil = novaFoto;
+                await updateDoc(doc(db, "usuarios", currentUser.uid), { nome: novoNome, fotoPerfil: novaFoto });
+
+                // Atualiza em Lote todos os Anúncios
+                const q = query(collection(db, "anuncios"), where("donoId", "==", currentUser.uid));
+                const snap = await getDocs(q);
+                
+                if(!snap.empty) {
+                    const batch = writeBatch(db);
+                    snap.forEach(docSnap => batch.update(docSnap.ref, { donoNome: novoNome, donoFoto: novaFoto }));
+                    await batch.commit();
+                }
+
+                alert("Perfil atualizado! As novas informações já aparecem nos seus anúncios.");
+                document.getElementById('advName').innerText = novoNome;
+                carregarMeusAnuncios();
+            } catch (error) {
+                console.error(error);
+                alert("Erro ao atualizar.");
+            } finally {
+                btn.innerText = "Atualizar Perfil e Publicações"; btn.disabled = false;
+            }
+        };
+
+        // ==========================================
+        // LÓGICA DO ANUNCIANTE (Postagens e Gestão)
         // ==========================================
         window.salvarConfigAnunciante = async () => {
             const key = document.getElementById('advGatewayKey').value;
             await updateDoc(doc(db, "usuarios", currentUser.uid), { gatewayKey: key });
             alert("Configurações atualizadas!");
-            location.reload(); // Recarrega para liberar o botão de produto pago
+            location.reload(); 
         };
 
         document.getElementById('postTipo').addEventListener('change', (e) => {
             const divPreco = document.getElementById('divPreco');
             const divArquivo = document.getElementById('divArquivo');
             if(e.target.value === 'pago') {
-                divPreco.classList.remove('hidden');
-                divArquivo.classList.remove('hidden');
+                divPreco.classList.remove('hidden'); divArquivo.classList.remove('hidden');
             } else if(e.target.value === 'gratis') {
-                divPreco.classList.add('hidden');
-                divArquivo.classList.remove('hidden');
+                divPreco.classList.add('hidden'); divArquivo.classList.remove('hidden');
             } else {
-                divPreco.classList.add('hidden');
-                divArquivo.classList.add('hidden');
+                divPreco.classList.add('hidden'); divArquivo.classList.add('hidden');
             }
         });
 
@@ -402,17 +452,14 @@
             reader.onload = async (event) => {
                 const img = new Image();
                 img.onload = async () => {
-                    // Compressão Canvas
                     const canvas = document.createElement('canvas');
                     const scaleSize = 800 / img.width;
                     canvas.width = 800; canvas.height = img.height * scaleSize;
                     canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
                     const imgBase64 = canvas.toDataURL('image/jpeg', 0.6);
 
-                    // Função para ler arquivo em Base64
                     const arquivoInput = document.getElementById('postArquivo').files[0];
-                    let arquivoData = "";
-                    let arquivoNome = "";
+                    let arquivoData = ""; let arquivoNome = "";
 
                     if(arquivoInput) {
                         arquivoNome = arquivoInput.name;
@@ -423,7 +470,6 @@
                         });
                     }
 
-                   // Salvar no Banco
                     await addDoc(collection(db, "anuncios"), {
                         donoId: currentUser.uid,
                         donoNome: userData.nome || currentUser.displayName,
@@ -451,51 +497,48 @@
             reader.readAsDataURL(file);
         });
 
-        // Função para carregar os próprios anúncios e comentários no painel do anunciante
         async function carregarMeusAnuncios() {
             if(!currentUser) return;
             const container = document.getElementById('meusAnunciosLista');
-            const { query, where } = await import("https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js");
-            
             const q = query(collection(db, "anuncios"), where("donoId", "==", currentUser.uid));
             const snap = await getDocs(q);
             
             container.innerHTML = "";
-            if(snap.empty) {
-                container.innerHTML = "<p class='text-slate-400 text-sm'>Você ainda não publicou nada.</p>";
-                return;
-            }
+            if(snap.empty) { container.innerHTML = "<p class='text-slate-400 text-sm'>Você ainda não publicou nada.</p>"; return; }
 
             snap.forEach(async (docSnap) => {
                 const p = docSnap.data();
                 const id = docSnap.id;
                 
-                // Buscar comentários deste post
                 const commSnap = await getDocs(collection(db, `anuncios/${id}/comentarios`));
                 let comentariosHtml = "";
                 commSnap.forEach(c => {
                     const cd = c.data();
-                    comentariosHtml += `<div class="bg-slate-50 p-2 rounded text-xs mt-1"><b>${cd.usuario}:</b> ${cd.texto} (${cd.nota}★)</div>`;
+                    let stars = '★'.repeat(cd.nota) + '☆'.repeat(6 - cd.nota);
+                    comentariosHtml += `<div class="bg-slate-50 p-3 rounded-xl border border-slate-100 mt-2 text-sm">
+                        <div class="flex justify-between text-slate-800 font-bold mb-1"><span>${cd.usuario}</span><span class="text-yellow-400">${stars}</span></div>
+                        <span class="text-slate-600">${cd.texto}</span>
+                    </div>`;
                 });
 
                 container.innerHTML += `
-                    <div class="border border-slate-200 rounded-xl p-4 flex flex-col gap-3">
+                    <div class="border border-slate-100 rounded-2xl p-5 flex flex-col gap-4 shadow-sm hover:shadow-md transition-shadow bg-white">
                         <div class="flex items-center justify-between">
-                            <div class="flex items-center gap-3">
-                                <img src="${p.imagem}" class="w-12 h-12 object-cover rounded-lg">
+                            <div class="flex items-center gap-4">
+                                <img src="${p.imagem}" class="w-14 h-14 object-cover rounded-xl shadow-sm">
                                 <div>
-                                    <h4 class="font-bold text-slate-800">${p.titulo}</h4>
-                                    <span class="text-xs bg-blue-50 text-blue-600 px-2 py-0.5 rounded uppercase font-semibold">${p.tipo}</span>
+                                    <h4 class="font-extrabold text-slate-800 text-lg">${p.titulo}</h4>
+                                    <span class="text-xs bg-blue-50 text-blue-600 px-2.5 py-1 rounded-md uppercase font-bold tracking-wider">${p.tipo}</span>
                                 </div>
                             </div>
                             <div class="flex gap-2">
-                                <button onclick="copiarLink('${id}')" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-lg"><i class="fas fa-share-alt"></i> Compartilhar Link</button>
-                                <button onclick="deletarAnuncio('${id}')" class="px-3 py-1.5 bg-red-50 hover:bg-red-100 text-red-600 text-xs font-semibold rounded-lg"><i class="fas fa-trash"></i> Excluir</button>
+                                <button onclick="copiarLink('${id}')" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-bold rounded-xl transition-colors"><i class="fas fa-share-alt"></i></button>
+                                <button onclick="deletarAnuncio('${id}')" class="px-4 py-2 bg-red-50 hover:bg-red-100 text-red-600 text-sm font-bold rounded-xl transition-colors"><i class="fas fa-trash"></i></button>
                             </div>
                         </div>
-                        <div class="border-t border-slate-100 pt-2">
-                            <p class="text-xs font-semibold text-slate-500 mb-1">Avaliações e Comentários:</p>
-                            ${comentariosHtml || '<p class="text-xs text-slate-400">Nenhum comentário ainda.</p>'}
+                        <div class="border-t border-slate-100 pt-4">
+                            <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Avaliações Recebidas:</p>
+                            ${comentariosHtml || '<p class="text-sm text-slate-400 italic">Nenhum comentário ainda.</p>'}
                         </div>
                     </div>
                 `;
@@ -505,15 +548,15 @@
         window.copiarLink = (id) => {
             const url = window.location.origin + window.location.pathname + "#post=" + id;
             navigator.clipboard.writeText(url);
-            alert("Link copiado para a área de transferência!");
+            alert("Link do anúncio copiado para a área de transferência!");
         };
 
         window.deletarAnuncio = async (id) => {
-            if(confirm("Tem certeza que deseja excluir esta publicação?")) {
-                const { deleteDoc } = await import("https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js");
+            if(confirm("Tem certeza que deseja excluir permanentemente esta publicação?")) {
                 await deleteDoc(doc(db, "anuncios", id));
-                alert("Publicado excluída com sucesso!");
+                alert("Publicação excluída com sucesso!");
                 carregarMeusAnuncios();
+                carregarFeed();
             }
         };
 
@@ -532,18 +575,13 @@
             tbody.innerHTML = "";
             snap.forEach(doc => {
                 const d = doc.data();
-                if(d.email === ADMIN_EMAIL) return; // ignora o proprio admin
-                tbody.innerHTML += `
-                    <tr class="border-b border-slate-100">
-                        <td class="p-4"><b>${d.nome}</b><br><span class="text-xs">${d.email}</span></td>
-                        <td class="p-4">${d.whatsapp || '--'}</td>
-                    </tr>
-                `;
+                if(d.email === ADMIN_EMAIL) return;
+                tbody.innerHTML += `<tr class="border-b border-slate-100"><td class="p-4"><b>${d.nome}</b><br><span class="text-xs">${d.email}</span></td><td class="p-4">${d.whatsapp || '--'}</td></tr>`;
             });
         }
 
         // ==========================================
-        // LÓGICA DA REDE SOCIAL (FEED)
+        // LÓGICA DA REDE SOCIAL (FEED E PÁGINA DO ANÚNCIO)
         // ==========================================
         async function carregarFeed() {
             const feed = document.getElementById('feedGrid');
@@ -557,25 +595,22 @@
                 const id = docSnap.id;
                 
                 let badge = "";
-                if(p.tipo === 'gratis') badge = '<span class="absolute top-4 left-4 bg-green-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg">GRÁTIS</span>';
-                if(p.tipo === 'pago') badge = `<span class="absolute top-4 left-4 bg-slate-900 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg">R$ ${p.preco}</span>`;
+                if(p.tipo === 'gratis') badge = '<span class="absolute top-4 left-4 bg-green-500 text-white text-xs font-black tracking-wider px-3 py-1.5 rounded-lg shadow-lg">GRÁTIS</span>';
+                if(p.tipo === 'pago') badge = `<span class="absolute top-4 left-4 bg-slate-900 text-white text-xs font-black tracking-wider px-3 py-1.5 rounded-lg shadow-lg">R$ ${p.preco}</span>`;
                 
                 feed.innerHTML += `
-                    <div class="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all border border-slate-200 cursor-pointer group" onclick="abrirModal('${id}')">
-                        <div class="h-56 overflow-hidden relative">
+                    <div class="bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all border border-slate-100 cursor-pointer group flex flex-col" onclick="abrirPost('${id}')">
+                        <div class="h-64 overflow-hidden relative bg-slate-50">
                             ${badge}
-                            <img src="${p.imagem}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                            <img src="${p.imagem}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700">
                         </div>
-                        <div class="p-6">
-                            <h3 class="text-xl font-bold text-slate-900 mb-2 truncate">${p.titulo}</h3>
-                            <p class="text-slate-500 text-sm line-clamp-2 mb-4">${p.descricao}</p>
-                            <div class="flex items-center justify-between border-t border-slate-100 pt-4">
-                                <div class="flex items-center gap-2">
-                                    <img src="${p.donoFoto || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(p.donoNome) + '&background=random'}" class="w-6 h-6 rounded-full object-cover border border-slate-200">
-                                    <span class="text-xs font-semibold text-slate-600">${p.donoNome}</span>
-                                </div>
-                                <div class="flex gap-3 text-slate-400">
-                                    <span class="hover:text-red-500 transition-colors"><i class="fas fa-heart"></i> ${p.likes || 0}</span>
+                        <div class="p-6 flex-1 flex flex-col">
+                            <h3 class="text-xl font-extrabold text-slate-900 mb-2 line-clamp-1 leading-tight">${p.titulo}</h3>
+                            <p class="text-slate-500 text-sm line-clamp-2 mb-6 flex-1 leading-relaxed">${p.descricao}</p>
+                            <div class="flex items-center justify-between border-t border-slate-100 pt-5">
+                                <div class="flex items-center gap-3">
+                                    <img src="${p.donoFoto || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(p.donoNome) + '&background=random'}" class="w-8 h-8 rounded-full object-cover border border-slate-200 shadow-sm">
+                                    <span class="text-sm font-bold text-slate-700">${p.donoNome}</span>
                                 </div>
                             </div>
                         </div>
@@ -584,52 +619,60 @@
             });
         }
 
-        window.abrirModal = async (postId) => {
-            const modal = document.getElementById('postModal');
-            modal.classList.remove('hidden');
+        // Sistema de 6 Estrelas
+        window.setNota = (nota) => {
+            document.getElementById('inputNota').value = nota;
+            const stars = document.querySelectorAll('.star-btn');
+            stars.forEach((star, index) => {
+                if (index < nota) {
+                    star.classList.remove('text-slate-200');
+                    star.classList.add('text-yellow-400');
+                } else {
+                    star.classList.remove('text-yellow-400');
+                    star.classList.add('text-slate-200');
+                }
+            });
+        };
 
-            // Limpa dados temporários antes de carregar
-            document.getElementById('modalImg').src = "";
-            document.getElementById('modalTitulo').innerText = "Carregando...";
-            document.getElementById('modalDesc').innerText = "";
-            document.getElementById('containerComentarios').innerHTML = "<p class='text-slate-400 text-sm'>Carregando...</p>";
-            document.getElementById('modalActions').innerHTML = "";
+        window.abrirPost = async (postId) => {
+            postAtualId = postId;
+            showView('post');
+            setNota(6); // Reseta as estrelas
 
-            const pRef = doc(db, "anuncios", postId);
-            const snap = await getDoc(pRef);
-            if(!snap.exists()) return;
+            document.getElementById('postPageImg').src = "";
+            document.getElementById('postPageTitulo').innerText = "Carregando...";
+            document.getElementById('postPageDesc').innerText = "";
+            document.getElementById('containerComentarios').innerHTML = "<p class='text-slate-400 text-sm'>Carregando avaliações...</p>";
+            document.getElementById('postPageActions').innerHTML = "";
+
+            const snap = await getDoc(doc(db, "anuncios", postId));
+            if(!snap.exists()) return showView('feed');
             const p = snap.data();
 
-            // Preenche os dados nos elementos corretos do Grid
-            document.getElementById('modalImg').src = p.imagem;
-            document.getElementById('modalTitulo').innerText = p.titulo;
-            document.getElementById('modalDesc').innerText = p.descricao;
+            document.getElementById('postPageImg').src = p.imagem;
+            document.getElementById('postPageTitulo').innerText = p.titulo;
+            document.getElementById('postPageDesc').innerText = p.descricao;
 
-            // Atribui a função de envio ao botão
-            document.getElementById('btnEnviarComentario').onclick = () => enviarComentario(postId);
+            await carregarComentariosPost(postId);
 
-            // Carrega os comentários
-            await carregarComentariosModal(postId);
-
-            // Monta os botões na coluna direita
-            const actionsDiv = document.getElementById('modalActions');
+            const actionsDiv = document.getElementById('postPageActions');
             
             if(p.whatsapp) {
-                actionsDiv.innerHTML += `<a href="https://wa.me/${p.whatsapp}" target="_blank" class="flex-1 py-3.5 bg-green-500 hover:bg-green-600 text-white text-center rounded-xl font-bold flex items-center justify-center gap-2 transition-colors shadow-sm"><i class="fab fa-whatsapp text-lg"></i> Contato</a>`;
+                actionsDiv.innerHTML += `<a href="https://wa.me/${p.whatsapp}" target="_blank" class="w-full py-4 bg-green-500 hover:bg-green-600 text-white text-center rounded-2xl font-bold flex items-center justify-center gap-3 transition-colors shadow-lg shadow-green-500/30 text-lg"><i class="fab fa-whatsapp text-2xl"></i> Falar no WhatsApp</a>`;
             }
             
             if(p.tipo === 'gratis') {
                 if(p.arquivoData) {
-                    actionsDiv.innerHTML += `<a href="${p.arquivoData}" download="${p.arquivoNome || 'arquivo'}" class="flex-1 py-3.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold flex items-center justify-center gap-2 transition-colors text-center shadow-sm"><i class="fas fa-download"></i> Baixar</a>`;
+                    actionsDiv.innerHTML += `<a href="${p.arquivoData}" download="${p.arquivoNome || 'arquivo'}" class="w-full py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl font-bold flex items-center justify-center gap-3 transition-colors text-center shadow-lg shadow-blue-500/30 text-lg"><i class="fas fa-download text-xl"></i> Baixar Arquivo Grátis</a>`;
                 } else {
-                    actionsDiv.innerHTML += `<button onclick="alert('Nenhum arquivo anexado')" class="flex-1 py-3.5 bg-slate-300 text-slate-600 rounded-xl font-bold">Sem arquivo</button>`;
+                    actionsDiv.innerHTML += `<button class="w-full py-4 bg-slate-100 text-slate-400 rounded-2xl font-bold cursor-not-allowed">Nenhum arquivo disponível</button>`;
                 }
             } else if(p.tipo === 'pago') {
-                actionsDiv.innerHTML += `<button onclick="alert('Redirecionando para o Gateway de pagamento...')" class="flex-1 py-3.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-bold flex items-center justify-center gap-2 transition-colors shadow-sm"><i class="fas fa-shopping-cart"></i> Comprar (R$ ${p.preco})</button>`;
+                actionsDiv.innerHTML += `<button onclick="alert('Integração com pagamento em breve!')" class="w-full py-4 bg-slate-900 hover:bg-slate-800 text-white rounded-2xl font-bold flex items-center justify-center gap-3 transition-colors shadow-lg shadow-slate-900/30 text-lg"><i class="fas fa-shopping-cart text-xl"></i> Comprar Agora (R$ ${p.preco})</button>`;
             }
         };
 
-        async function carregarComentariosModal(postId) {
+        async function carregarComentariosPost(postId) {
             const commSnap = await getDocs(collection(db, `anuncios/${postId}/comentarios`));
             const container = document.getElementById('containerComentarios');
             container.innerHTML = "";
@@ -638,119 +681,48 @@
             commSnap.forEach(c => {
                 count++;
                 const cd = c.data();
+                let stars = '★'.repeat(cd.nota) + '☆'.repeat(6 - cd.nota);
                 container.innerHTML += `
-                    <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 text-xs shadow-xs">
-                        <div class="flex justify-between font-bold text-slate-800 mb-1">
-                            <span>${cd.usuario}</span>
-                            <span class="text-yellow-500">${cd.nota}★</span>
+                    <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100 shadow-sm">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="font-bold text-slate-800 text-sm">${cd.usuario}</span>
+                            <span class="text-yellow-400 text-lg tracking-widest">${stars}</span>
                         </div>
-                        <p class="text-slate-600">${cd.texto}</p>
+                        <p class="text-slate-600 text-sm leading-relaxed">${cd.texto}</p>
                     </div>
                 `;
             });
 
             if(count === 0) {
-                container.innerHTML = `<p class='text-slate-400 text-xs text-slate-400'>Nenhum comentário ainda. Seja o primeiro!</p>`;
+                container.innerHTML = `<p class='text-slate-400 text-sm italic'>Nenhuma avaliação ainda. Seja o primeiro a compartilhar sua experiência!</p>`;
             }
         }
 
-        window.enviarComentario = async (postId) => {
-            if(!currentUser) return alert("Você precisa fazer login para avaliar.");
+        document.getElementById('btnEnviarComentario').addEventListener('click', async () => {
+            if(!currentUser) return alert("Você precisa fazer login na plataforma para avaliar.");
+            if(!postAtualId) return;
+
             const nota = document.getElementById('inputNota').value;
             const texto = document.getElementById('inputComentario').value;
-            if(!texto) return alert("Escreva um comentário.");
+            if(!texto) return alert("Escreva um depoimento antes de enviar.");
 
-            await addDoc(collection(db, `anuncios/${postId}/comentarios`), {
-                usuario: currentUser.displayName,
-                nota: nota,
+            const btn = document.getElementById('btnEnviarComentario');
+            btn.innerText = "Enviando..."; btn.disabled = true;
+
+            await addDoc(collection(db, `anuncios/${postAtualId}/comentarios`), {
+                usuario: userData.nome || currentUser.displayName,
+                nota: Number(nota),
                 texto: texto,
                 data: serverTimestamp()
             });
 
             document.getElementById('inputComentario').value = "";
-            alert("Comentário enviado com sucesso!");
-            carregarComentariosModal(postId);
-        };
+            alert("Avaliação enviada com sucesso!");
+            btn.innerText = "Publicar Avaliação"; btn.disabled = false;
+            carregarComentariosPost(postAtualId);
+        });
 
-        window.fecharModal = () => document.getElementById('postModal').classList.add('hidden');
-// ==========================================
-        // LÓGICA DO PERFIL (FOTO E NOME)
-        // ==========================================
-        window.abrirPerfil = () => {
-            document.getElementById('perfilModal').classList.remove('hidden');
-            document.getElementById('inputNomePerfil').value = userData.nome || currentUser.displayName;
-            document.getElementById('previewFoto').src = userData.fotoPerfil || `https://ui-avatars.com/api/?name=${encodeURIComponent(userData.nome || currentUser.displayName)}&background=random`;
-        };
-
-        window.fecharPerfil = () => document.getElementById('perfilModal').classList.add('hidden');
-
-        window.salvarPerfil = async () => {
-            const btn = document.getElementById('btnSalvarPerfil');
-            btn.innerText = "Processando..."; btn.disabled = true;
-
-            const novoNome = document.getElementById('inputNomePerfil').value;
-            const file = document.getElementById('inputFotoPerfil').files[0];
-            let novaFoto = userData.fotoPerfil || "";
-
-            if(file) {
-                novaFoto = await new Promise((resolve) => {
-                    const r = new FileReader();
-                    r.onload = e => {
-                        const img = new Image();
-                        img.onload = () => {
-                            const canvas = document.createElement('canvas');
-                            const size = 150; // Comprime a foto de perfil para ficar super leve
-                            canvas.width = size; canvas.height = size;
-                            const ctx = canvas.getContext('2d');
-                            // Recorte centralizado
-                            const minSize = Math.min(img.width, img.height);
-                            const sx = (img.width - minSize) / 2;
-                            const sy = (img.height - minSize) / 2;
-                            ctx.drawImage(img, sx, sy, minSize, minSize, 0, 0, size, size);
-                            resolve(canvas.toDataURL('image/jpeg', 0.8));
-                        };
-                        img.src = e.target.result;
-                    };
-                    r.readAsDataURL(file);
-                });
-            }
-
-            try {
-                // Atualiza perfil no Firebase Auth
-                await updateProfile(currentUser, { displayName: novoNome });
-                
-                // Atualiza coleção de usuário
-                userData.nome = novoNome;
-                userData.fotoPerfil = novaFoto;
-                await updateDoc(doc(db, "usuarios", currentUser.uid), { nome: novoNome, fotoPerfil: novaFoto });
-
-                // Atualiza TODOS os anúncios do usuário (Batch Update)
-                const q = query(collection(db, "anuncios"), where("donoId", "==", currentUser.uid));
-                const snap = await getDocs(q);
-                
-                if(!snap.empty) {
-                    const batch = writeBatch(db);
-                    snap.forEach(docSnap => {
-                        batch.update(docSnap.ref, { donoNome: novoNome, donoFoto: novaFoto });
-                    });
-                    await batch.commit();
-                }
-
-                alert("Perfil e publicações atualizados com sucesso!");
-                fecharPerfil();
-                carregarFeed(); 
-                
-                if(document.getElementById('advName')) {
-                    document.getElementById('advName').innerText = novoNome;
-                }
-            } catch (error) {
-                console.error("Erro ao salvar perfil:", error);
-                alert("Erro ao atualizar perfil.");
-            } finally {
-                btn.innerText = "Salvar e Atualizar Publicações"; btn.disabled = false;
-            }
-        };
-        // Inicializa o feed ao carregar a página
+        // Inicia o App
         carregarFeed();
     </script>
 </body>
