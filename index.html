@@ -1,116 +1,454 @@
 <!DOCTYPE html>
-<html lang="pt-BR" class="h-full bg-slate-50">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ProConnect - Rede de Serviços</title>
+    <title>ProConnect | Plataforma Premium</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', sans-serif; color: #0f172a; }
-        .font-heading { font-family: 'Plus Jakarta Sans', sans-serif; }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #F8FAFC; }
+        
+        /* Oculta scrollbar mas mantém scroll */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        .glass-modal { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); }
     </style>
 </head>
-<body class="min-h-full flex flex-col bg-slate-50 antialiased">
+<body class="text-slate-800 antialiased overflow-x-hidden">
 
-    <!-- Header -->
-    <header class="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-slate-200 shadow-sm">
-        <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center font-heading font-extrabold text-xl">P</div>
-                <span class="font-heading font-bold text-lg">ProConnect</span>
-            </div>
-            <a href="painel-anunciante.html" target="_blank" class="bg-slate-900 text-white text-xs font-bold px-4 py-2 rounded-xl hover:bg-slate-800 transition-colors">Anunciar Solução</a>
+    <!-- NAVBAR PRINCIPAL -->
+    <nav class="fixed top-0 w-full bg-white/80 backdrop-blur-md border-b border-slate-200 z-40 h-16 flex items-center justify-between px-6 md:px-12 transition-all">
+        <div class="flex items-center gap-2 cursor-pointer" onclick="showView('feed')">
+            <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold"><i class="fas fa-link"></i></div>
+            <h1 class="text-xl font-bold tracking-tight text-slate-900">Pro<span class="text-blue-600">Connect</span></h1>
         </div>
-    </header>
+        
+        <div class="flex items-center gap-4">
+            <button id="btnNavPanel" class="hidden text-sm font-medium text-slate-600 hover:text-blue-600 transition-colors" onclick="goToPanel()">Meu Painel</button>
+            <button id="btnLogin" class="px-5 py-2 bg-slate-900 hover:bg-slate-800 text-white text-sm font-medium rounded-full transition-all flex items-center gap-2 shadow-md">
+                <i class="fab fa-google"></i> Login
+            </button>
+            <button id="btnLogout" class="hidden px-5 py-2 border border-slate-200 text-slate-600 hover:bg-slate-50 text-sm font-medium rounded-full transition-all" onclick="logout()">
+                Sair
+            </button>
+        </div>
+    </nav>
 
-    <main class="max-w-7xl mx-auto px-4 py-8 w-full flex-1">
-        <!-- Loader -->
-        <div id="loader" class="text-center py-20 text-slate-400 font-medium animate-pulse">Carregando anúncios do Firebase...</div>
+    <!-- ========================================== -->
+    <!-- VISÃO 1: REDE SOCIAL (FEED)                -->
+    <!-- ========================================== -->
+    <main id="view-feed" class="pt-24 pb-12 px-6 md:px-12 max-w-7xl mx-auto block">
+        <div class="text-center max-w-2xl mx-auto mb-12">
+            <h2 class="text-3xl md:text-5xl font-bold text-slate-900 mb-4 tracking-tight">Descubra soluções para o seu negócio</h2>
+            <p class="text-slate-500 text-lg">Serviços premium, sistemas prontos e produtos digitais criados por profissionais.</p>
+        </div>
 
-        <!-- Feed Grid -->
-        <div id="feed" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 hidden">
-            <!-- Anuncios Injetados Via JS -->
+        <!-- Grade de Anúncios -->
+        <div id="feedGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <!-- Anúncios serão injetados aqui via JS -->
+            <div class="text-center col-span-full py-12 text-slate-400">Carregando soluções...</div>
         </div>
     </main>
 
-    <!-- Script de Integração com Firebase -->
-    <script type="module">
-        import { db } from './firebase-config.js';
-        import { collection, getDocs, orderBy, query } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    <!-- ========================================== -->
+    <!-- VISÃO 2: PAINEL DO ANUNCIANTE (CREATOR)    -->
+    <!-- ========================================== -->
+    <main id="view-advertiser" class="hidden pt-16 h-screen flex">
+        <!-- Sidebar Anunciante -->
+        <aside class="w-64 bg-white border-r border-slate-200 flex flex-col pt-6 hidden md:flex">
+            <div class="px-6 mb-6">
+                <span class="text-xs font-bold text-blue-600 tracking-wider uppercase bg-blue-50 px-2 py-1 rounded">Painel Creator</span>
+            </div>
+            <nav class="flex-1 px-4 space-y-1">
+                <button onclick="switchTab('adv-dashboard')" class="tab-btn adv-dashboard w-full flex items-center gap-3 px-4 py-3 bg-slate-100 text-slate-900 rounded-lg font-medium text-left"><i class="fas fa-home w-5"></i> Início</button>
+                <button onclick="switchTab('adv-new')" class="tab-btn adv-new w-full flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-50 rounded-lg font-medium text-left transition-colors"><i class="fas fa-plus w-5"></i> Publicar</button>
+                <button onclick="switchTab('adv-config')" class="tab-btn adv-config w-full flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-50 rounded-lg font-medium text-left transition-colors"><i class="fas fa-cog w-5"></i> Configurações</button>
+            </nav>
+        </aside>
 
-        async function loadFeed() {
-            const feedDiv = document.getElementById('feed');
-            const loader = document.getElementById('loader');
+        <!-- Conteúdo Anunciante -->
+        <div class="flex-1 overflow-y-auto bg-slate-50 p-8">
+            <!-- Tab Início -->
+            <div id="adv-dashboard" class="tab-content block max-w-4xl mx-auto space-y-6">
+                <h2 class="text-2xl font-bold">Bem-vindo, <span id="advName">Anunciante</span></h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm"><p class="text-slate-500 text-sm">Visualizações</p><h3 class="text-3xl font-bold mt-2">--</h3></div>
+                    <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm"><p class="text-slate-500 text-sm">Avaliações Médias</p><h3 class="text-3xl font-bold mt-2 text-yellow-500"><i class="fas fa-star text-xl"></i> --</h3></div>
+                </div>
+            </div>
+
+            <!-- Tab Configurações (API GATEWAY) -->
+            <div id="adv-config" class="tab-content hidden max-w-4xl mx-auto space-y-6">
+                <div class="bg-white p-8 rounded-2xl border border-slate-200 shadow-sm">
+                    <h2 class="text-xl font-bold mb-2">Configurações de Pagamento</h2>
+                    <p class="text-slate-500 text-sm mb-6">Para vender produtos pagos na plataforma, você precisa configurar seu Gateway (ex: Mercado Pago).</p>
+                    
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">Chave Pública (Public Key) do Gateway</label>
+                            <input type="text" id="advGatewayKey" class="w-full border border-slate-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 outline-none" placeholder="APP_USR-...">
+                        </div>
+                        <button onclick="salvarConfigAnunciante()" class="px-6 py-2.5 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700">Salvar Configurações</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab Novo Anúncio -->
+            <div id="adv-new" class="tab-content hidden max-w-4xl mx-auto space-y-6">
+                <form id="formNovoAnuncio" class="bg-white p-8 rounded-2xl border border-slate-200 shadow-sm space-y-6">
+                    <h2 class="text-xl font-bold border-b border-slate-100 pb-4">Criar nova publicação</h2>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div><label class="block text-sm font-medium text-slate-700 mb-1">Título</label><input type="text" id="postTitulo" required class="w-full border border-slate-300 rounded-lg px-4 py-3 outline-none focus:border-blue-500"></div>
+                        <div><label class="block text-sm font-medium text-slate-700 mb-1">WhatsApp (Opcional)</label><input type="text" id="postWhats" placeholder="5511999999999" class="w-full border border-slate-300 rounded-lg px-4 py-3 outline-none focus:border-blue-500"></div>
+                    </div>
+                    
+                    <div><label class="block text-sm font-medium text-slate-700 mb-1">Descrição</label><textarea id="postDesc" required rows="4" class="w-full border border-slate-300 rounded-lg px-4 py-3 outline-none focus:border-blue-500"></textarea></div>
+
+                    <div class="p-5 bg-slate-50 rounded-xl border border-slate-200 space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">Tipo de Solução</label>
+                            <select id="postTipo" class="w-full border border-slate-300 rounded-lg px-4 py-3 outline-none bg-white">
+                                <option value="servico">Divulgação de Serviço</option>
+                                <option value="gratis">Produto Digital (Download Grátis)</option>
+                                <option value="pago" id="optPago" disabled>Produto Digital (Venda) - Requer Gateway configurado</option>
+                            </select>
+                            <p id="avisoGateway" class="text-xs text-red-500 mt-2 hidden">Você precisa configurar a chave do Gateway nas configurações para vender.</p>
+                        </div>
+                        <div id="divPreco" class="hidden">
+                            <label class="block text-sm font-medium text-slate-700 mb-1">Preço (R$)</label>
+                            <input type="number" id="postPreco" step="0.01" class="w-full border border-slate-300 rounded-lg px-4 py-3 outline-none">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Imagem de Capa (Obrigatório)</label>
+                        <input type="file" id="postImg" accept="image/*" required class="block w-full text-sm text-slate-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700">
+                    </div>
+
+                    <button type="submit" id="btnSalvarPost" class="w-full py-4 bg-slate-900 text-white rounded-xl font-medium hover:bg-slate-800 transition-colors shadow-lg">Publicar Agora</button>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <!-- ========================================== -->
+    <!-- VISÃO 3: PAINEL DE GESTÃO (ADMIN)          -->
+    <!-- ========================================== -->
+    <main id="view-admin" class="hidden pt-16 h-screen flex">
+        <aside class="w-64 bg-slate-900 text-white flex flex-col pt-6 hidden md:flex">
+            <div class="px-6 mb-6"><span class="text-xs font-bold text-red-400 tracking-wider uppercase bg-slate-800 px-2 py-1 rounded">Gestão Admin</span></div>
+            <nav class="flex-1 px-4 space-y-1">
+                <button class="w-full flex items-center gap-3 px-4 py-3 bg-slate-800 text-white rounded-lg font-medium text-left"><i class="fas fa-users w-5"></i> Assinantes</button>
+            </nav>
+        </aside>
+        
+        <div class="flex-1 overflow-y-auto bg-slate-50 p-8">
+            <div class="max-w-5xl mx-auto space-y-8">
+                
+                <!-- Token Admin -->
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                    <h2 class="text-xl font-bold mb-4">Cobrança da Plataforma</h2>
+                    <div class="flex gap-4">
+                        <input type="text" id="adminMpToken" class="flex-1 border border-slate-300 rounded-lg px-4 py-2 outline-none focus:border-blue-500" placeholder="Seu Access Token Mercado Pago">
+                        <button onclick="salvarTokenAdmin()" class="px-6 py-2 bg-slate-900 text-white rounded-lg font-medium">Salvar Token</button>
+                    </div>
+                </div>
+
+                <!-- Lista de Assinantes -->
+                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                    <div class="p-6 border-b border-slate-200 bg-slate-50 flex justify-between"><h3 class="font-bold text-lg">Anunciantes Cadastrados</h3></div>
+                    <table class="w-full text-left border-collapse">
+                        <thead><tr class="border-b border-slate-200 text-sm text-slate-500"><th class="p-4">Usuário / Email</th><th class="p-4">WhatsApp</th></tr></thead>
+                        <tbody id="listaAdminUsers" class="text-sm text-slate-600">
+                            <!-- Injetado via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- ========================================== -->
+    <!-- MODAL DE DETALHES DO POST                  -->
+    <!-- ========================================== -->
+    <div id="postModal" class="hidden fixed inset-0 z-50 flex justify-end glass-modal">
+        <div class="bg-white w-full max-w-2xl h-full shadow-2xl flex flex-col transform transition-transform border-l border-slate-200 overflow-y-auto relative">
+            <button onclick="fecharModal()" class="absolute top-6 right-6 w-10 h-10 bg-slate-100 rounded-full flex items-center justify-center text-slate-600 hover:bg-slate-200 z-10"><i class="fas fa-times"></i></button>
             
-            try {
-                // Busca anúncios ordenados pela data mais recente
-                const q = query(collection(db, "anuncios"), orderBy("dataCriacao", "desc"));
-                const querySnapshot = await getDocs(q);
-                
-                let html = '';
-                querySnapshot.forEach((doc) => {
-                    const ad = doc.data();
-                    
-                    // Tratamento de badges de preço/tipo
-                    let badgeStyles = "bg-blue-50 text-blue-700 border-blue-100";
-                    let displayPrice = `<span class="text-xs font-bold text-slate-500">Sob Orçamento</span>`;
-                    
-                    if(ad.tipo === 'gratis') {
-                        badgeStyles = "bg-emerald-50 text-emerald-700 border-emerald-100";
-                        displayPrice = `<span class="text-xs font-bold text-emerald-700">Download Grátis</span>`;
-                    } else if (ad.tipo === 'pago') {
-                        badgeStyles = "bg-amber-50 text-amber-700 border-amber-100";
-                        displayPrice = `<span class="text-sm font-extrabold text-slate-900">R$ ${ad.preco.toFixed(2).replace('.',',')}</span>`;
-                    }
+            <div id="modalContent" class="pb-24">
+                <!-- Conteúdo do post injetado via JS -->
+            </div>
+            
+            <!-- Barra inferior Fixa de Ação -->
+            <div id="modalActions" class="fixed bottom-0 w-full max-w-2xl bg-white border-t border-slate-200 p-4 flex gap-4">
+                <!-- Botões (Whats, Comprar, Download) injetados via JS -->
+            </div>
+        </div>
+    </div>
 
-                    // Verifica se o anunciante disponibilizou o whatsapp no momento do post
-                    const waLink = ad.autor.whatsapp ? `href="https://wa.me/${ad.autor.whatsapp}" target="_blank"` : `onclick="alert('Anunciante sem WhatsApp cadastrado.')"`;
 
-                    html += `
-                        <article class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden hover:shadow-md transition-shadow flex flex-col group">
-                            <div class="relative aspect-video overflow-hidden bg-slate-100 border-b border-slate-100">
-                                <img src="${ad.imagemBase64}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
-                                <span class="absolute top-3 left-3 px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider border shadow-sm ${badgeStyles} bg-white/90 backdrop-blur-sm">
-                                    ${ad.tipo}
-                                </span>
-                            </div>
-                            
-                            <div class="p-5 flex-1 space-y-3">
-                                <div class="flex items-center gap-2">
-                                    <img src="${ad.autor.avatar || 'https://via.placeholder.com/40'}" class="w-6 h-6 rounded-full">
-                                    <span class="text-xs font-semibold text-slate-700">${ad.autor.nome}</span>
-                                    <span class="text-[10px] text-slate-400 ml-auto">${ad.categoria}</span>
-                                </div>
-                                
-                                <h3 class="font-heading font-bold text-sm text-slate-900 line-clamp-2">${ad.titulo}</h3>
-                                <p class="text-xs text-slate-500 line-clamp-2 leading-relaxed">${ad.descricao}</p>
-                            </div>
+    <!-- ========================================== -->
+    <!-- LÓGICA DO SISTEMA (JavaScript)             -->
+    <!-- ========================================== -->
+    <script type="module">
+        import { app, db, auth, provider, signInWithPopup, signOut, onAuthStateChanged, ADMIN_EMAIL } from './firebase-config.js';
+        import { collection, addDoc, getDocs, doc, setDoc, getDoc, serverTimestamp, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-                            <div class="px-5 py-4 border-t border-slate-100 flex items-center justify-between">
-                                <div>${displayPrice}</div>
-                                <a ${waLink} class="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 text-emerald-700 rounded-lg text-xs font-bold hover:bg-emerald-100 transition-colors cursor-pointer">
-                                    <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
-                                    Contato
-                                </a>
-                            </div>
-                        </article>
-                    `;
-                });
+        // Variaveis globais de estado
+        let currentUser = null;
+        let userData = null;
 
-                if(html === '') html = `<div class="col-span-3 text-center py-20 text-slate-400 font-medium">Nenhum anúncio publicado ainda.</div>`;
-                
-                loader.classList.add('hidden');
-                feedDiv.innerHTML = html;
-                feedDiv.classList.remove('hidden');
+        // Gerenciamento de Visualizações (Router Simples)
+        window.showView = (viewId) => {
+            document.getElementById('view-feed').classList.add('hidden');
+            document.getElementById('view-advertiser').classList.add('hidden');
+            document.getElementById('view-admin').classList.add('hidden');
+            
+            document.getElementById(`view-${viewId}`).classList.remove('hidden');
+            if(viewId === 'feed') carregarFeed();
+        };
 
-            } catch (e) {
-                loader.innerText = "Erro ao conectar com o banco de dados. " + e.message;
-                console.error(e);
+        // Abas do Painel Anunciante
+        window.switchTab = (tabId) => {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.tab-btn').forEach(el => {
+                el.classList.remove('bg-slate-100', 'text-slate-900');
+                el.classList.add('text-slate-600');
+            });
+            document.getElementById(tabId).classList.remove('hidden');
+            document.querySelector(`.tab-btn.${tabId}`).classList.add('bg-slate-100', 'text-slate-900');
+            document.querySelector(`.tab-btn.${tabId}`).classList.remove('text-slate-600');
+        };
+
+        // Autenticação
+        document.getElementById('btnLogin').addEventListener('click', () => {
+            signInWithPopup(auth, provider).catch(err => console.error(err));
+        });
+
+        window.logout = () => signOut(auth).then(() => { showView('feed'); location.reload(); });
+
+        window.goToPanel = () => {
+            if(!currentUser) return;
+            if(currentUser.email === ADMIN_EMAIL) {
+                showView('admin');
+                carregarListaAdmin();
+            } else {
+                showView('advertiser');
             }
+        };
+
+        // Ouvinte de Estado da Sessão
+        onAuthStateChanged(auth, async (user) => {
+            currentUser = user;
+            const btnLogin = document.getElementById('btnLogin');
+            const btnLogout = document.getElementById('btnLogout');
+            const btnPanel = document.getElementById('btnNavPanel');
+
+            if(user) {
+                btnLogin.classList.add('hidden');
+                btnLogout.classList.remove('hidden');
+                btnPanel.classList.remove('hidden');
+                
+                // Salva/Recupera dados do usuário logado
+                const userRef = doc(db, "usuarios", user.uid);
+                const docSnap = await getDoc(userRef);
+                
+                if(docSnap.exists()) {
+                    userData = docSnap.data();
+                } else {
+                    userData = { nome: user.displayName, email: user.email, gatewayKey: "", whatsapp: "" };
+                    await setDoc(userRef, userData);
+                }
+
+                if(user.email !== ADMIN_EMAIL) {
+                    document.getElementById('advName').innerText = user.displayName;
+                    if(userData.gatewayKey) {
+                        document.getElementById('advGatewayKey').value = userData.gatewayKey;
+                        document.getElementById('optPago').removeAttribute('disabled');
+                        document.getElementById('avisoGateway').classList.add('hidden');
+                    } else {
+                        document.getElementById('optPago').setAttribute('disabled', 'true');
+                        document.getElementById('avisoGateway').classList.remove('hidden');
+                    }
+                }
+            } else {
+                btnLogin.classList.remove('hidden');
+                btnLogout.classList.add('hidden');
+                btnPanel.classList.add('hidden');
+            }
+        });
+
+        // ==========================================
+        // LÓGICA DO ANUNCIANTE
+        // ==========================================
+        window.salvarConfigAnunciante = async () => {
+            const key = document.getElementById('advGatewayKey').value;
+            await updateDoc(doc(db, "usuarios", currentUser.uid), { gatewayKey: key });
+            alert("Configurações atualizadas!");
+            location.reload(); // Recarrega para liberar o botão de produto pago
+        };
+
+        document.getElementById('postTipo').addEventListener('change', (e) => {
+            const divPreco = document.getElementById('divPreco');
+            if(e.target.value === 'pago') divPreco.classList.remove('hidden');
+            else divPreco.classList.add('hidden');
+        });
+
+        document.getElementById('formNovoAnuncio').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('btnSalvarPost');
+            btn.innerText = "Processando..."; btn.disabled = true;
+
+            const file = document.getElementById('postImg').files[0];
+            const reader = new FileReader();
+            
+            reader.onload = async (event) => {
+                const img = new Image();
+                img.onload = async () => {
+                    // Compressão Canvas
+                    const canvas = document.createElement('canvas');
+                    const scaleSize = 800 / img.width;
+                    canvas.width = 800; canvas.height = img.height * scaleSize;
+                    canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+                    const imgBase64 = canvas.toDataURL('image/jpeg', 0.6);
+
+                    // Salvar no Banco
+                    await addDoc(collection(db, "anuncios"), {
+                        donoId: currentUser.uid,
+                        donoNome: currentUser.displayName,
+                        titulo: document.getElementById('postTitulo').value,
+                        descricao: document.getElementById('postDesc').value,
+                        whatsapp: document.getElementById('postWhats').value || userData.whatsapp,
+                        tipo: document.getElementById('postTipo').value,
+                        preco: document.getElementById('postPreco').value || 0,
+                        imagem: imgBase64,
+                        likes: 0,
+                        data: serverTimestamp()
+                    });
+                    
+                    alert("Publicado com sucesso!");
+                    document.getElementById('formNovoAnuncio').reset();
+                    btn.innerText = "Publicar Agora"; btn.disabled = false;
+                    switchTab('adv-dashboard');
+                };
+                img.src = event.target.result;
+            };
+            reader.readAsDataURL(file);
+        });
+
+        // ==========================================
+        // LÓGICA DO ADMIN
+        // ==========================================
+        window.salvarTokenAdmin = async () => {
+            const token = document.getElementById('adminMpToken').value;
+            await setDoc(doc(db, "admin", "configs"), { mpToken: token });
+            alert("Token salvo!");
+        };
+
+        async function carregarListaAdmin() {
+            const snap = await getDocs(collection(db, "usuarios"));
+            const tbody = document.getElementById('listaAdminUsers');
+            tbody.innerHTML = "";
+            snap.forEach(doc => {
+                const d = doc.data();
+                if(d.email === ADMIN_EMAIL) return; // ignora o proprio admin
+                tbody.innerHTML += `
+                    <tr class="border-b border-slate-100">
+                        <td class="p-4"><b>${d.nome}</b><br><span class="text-xs">${d.email}</span></td>
+                        <td class="p-4">${d.whatsapp || '--'}</td>
+                    </tr>
+                `;
+            });
         }
 
-        window.onload = loadFeed;
+        // ==========================================
+        // LÓGICA DA REDE SOCIAL (FEED)
+        // ==========================================
+        async function carregarFeed() {
+            const feed = document.getElementById('feedGrid');
+            const snap = await getDocs(collection(db, "anuncios"));
+            feed.innerHTML = "";
+            
+            if(snap.empty) { feed.innerHTML = "<p class='col-span-full text-center'>Nenhum anúncio disponível.</p>"; return; }
+
+            snap.forEach(docSnap => {
+                const p = docSnap.data();
+                const id = docSnap.id;
+                
+                let badge = "";
+                if(p.tipo === 'gratis') badge = '<span class="absolute top-4 left-4 bg-green-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg">GRÁTIS</span>';
+                if(p.tipo === 'pago') badge = `<span class="absolute top-4 left-4 bg-slate-900 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg">R$ ${p.preco}</span>`;
+                
+                feed.innerHTML += `
+                    <div class="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all border border-slate-200 cursor-pointer group" onclick="abrirModal('${id}')">
+                        <div class="h-56 overflow-hidden relative">
+                            ${badge}
+                            <img src="${p.imagem}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                        </div>
+                        <div class="p-6">
+                            <h3 class="text-xl font-bold text-slate-900 mb-2 truncate">${p.titulo}</h3>
+                            <p class="text-slate-500 text-sm line-clamp-2 mb-4">${p.descricao}</p>
+                            <div class="flex items-center justify-between border-t border-slate-100 pt-4">
+                                <span class="text-xs text-slate-400">Por ${p.donoNome}</span>
+                                <div class="flex gap-3 text-slate-400">
+                                    <span class="hover:text-red-500 transition-colors"><i class="fas fa-heart"></i> ${p.likes || 0}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        window.abrirModal = async (postId) => {
+            const modal = document.getElementById('postModal');
+            const content = document.getElementById('modalContent');
+            const actions = document.getElementById('modalActions');
+            
+            content.innerHTML = "<div class='p-12 text-center'>Carregando...</div>";
+            actions.innerHTML = "";
+            modal.classList.remove('hidden');
+
+            const pRef = doc(db, "anuncios", postId);
+            const snap = await getDoc(pRef);
+            if(!snap.exists()) return;
+            const p = snap.data();
+
+            content.innerHTML = `
+                <img src="${p.imagem}" class="w-full h-72 object-cover">
+                <div class="p-8">
+                    <h2 class="text-3xl font-bold mb-4">${p.titulo}</h2>
+                    <p class="text-slate-600 whitespace-pre-wrap leading-relaxed">${p.descricao}</p>
+                    
+                    <div class="mt-8 pt-8 border-t border-slate-200">
+                        <h3 class="font-bold text-lg mb-4">Avaliações</h3>
+                        <div class="flex items-center gap-2 mb-6">
+                            <div class="flex text-yellow-400 text-xl"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
+                            <span class="text-slate-500 text-sm">(Sistema de avaliação interativo)</span>
+                        </div>
+                        <textarea class="w-full border border-slate-200 rounded-lg p-4 text-sm outline-none" rows="3" placeholder="Deixe um comentário..."></textarea>
+                    </div>
+                </div>
+            `;
+
+            // Construir Botões de Ação
+            let btnWhats = p.whatsapp ? `<a href="https://wa.me/${p.whatsapp}" target="_blank" class="flex-1 py-4 bg-green-500 hover:bg-green-600 text-white text-center rounded-xl font-bold flex items-center justify-center gap-2 transition-colors"><i class="fab fa-whatsapp text-xl"></i> Contato</a>` : '';
+            
+            let btnPrincipal = "";
+            if(p.tipo === 'gratis') btnPrincipal = `<button class="flex-1 py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold flex items-center justify-center gap-2 transition-colors"><i class="fas fa-download"></i> Baixar Grátis</button>`;
+            else if(p.tipo === 'pago') btnPrincipal = `<button class="flex-1 py-4 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-bold flex items-center justify-center gap-2 transition-colors"><i class="fas fa-shopping-cart"></i> Comprar (R$ ${p.preco})</button>`;
+
+            actions.innerHTML = btnWhats + btnPrincipal;
+        };
+
+        window.fecharModal = () => document.getElementById('postModal').classList.add('hidden');
+
+        // Inicializa o feed ao carregar a página
+        carregarFeed();
     </script>
 </body>
 </html>
