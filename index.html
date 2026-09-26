@@ -13,9 +13,13 @@
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         
-        /* Efeito futurista / Glassmorphism */
         .glass-panel { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.5); }
         .modern-shadow { box-shadow: 0 20px 40px -15px rgba(0,0,0,0.05); }
+
+        /* Classes ativas para os filtros */
+        .btn-filter-active { background-color: #ffffff; color: #0f172a; }
+        .btn-filter-inactive { background-color: rgba(255,255,255,0.15); color: #ffffff; backdrop-filter: blur(4px); }
+        .btn-filter-inactive:hover { background-color: rgba(255,255,255,0.25); }
     </style>
 </head>
 <body class="text-slate-800 antialiased overflow-x-hidden">
@@ -41,14 +45,39 @@
     <!-- ========================================== -->
     <!-- VISÃO 1: REDE SOCIAL (FEED)                -->
     <!-- ========================================== -->
-    <main id="view-feed" class="pt-24 pb-12 px-6 md:px-12 max-w-7xl mx-auto block">
-        <div class="text-center max-w-2xl mx-auto mb-12">
-            <h2 class="text-3xl md:text-5xl font-extrabold text-slate-900 mb-4 tracking-tight">Descubra soluções para o seu negócio</h2>
-            <p class="text-slate-500 text-lg">Serviços premium, sistemas prontos e produtos digitais criados por profissionais.</p>
+    <main id="view-feed" class="pt-24 pb-12 px-4 md:px-8 max-w-7xl mx-auto block">
+        
+        <!-- HERO SECTION (PESQUISA E FILTROS) -->
+        <div class="relative bg-gradient-to-br from-slate-900 via-blue-900 to-slate-800 rounded-[2.5rem] p-8 md:p-16 mb-12 shadow-2xl overflow-hidden">
+            <!-- Elementos decorativos de fundo -->
+            <div class="absolute -top-32 -right-32 w-96 h-96 bg-blue-500/30 rounded-full blur-3xl pointer-events-none"></div>
+            <div class="absolute -bottom-32 -left-32 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl pointer-events-none"></div>
+
+            <div class="relative z-10 text-center max-w-4xl mx-auto">
+                <h2 class="text-3xl md:text-5xl font-extrabold text-white mb-8 tracking-tight leading-tight">O que você está buscando hoje?</h2>
+                
+                <!-- Barra de Pesquisa -->
+                <div class="relative flex items-center max-w-2xl mx-auto mb-8">
+                    <i class="fas fa-search absolute left-6 text-slate-400 text-xl"></i>
+                    <input type="text" id="searchInput" onkeyup="filtrarFeed()" placeholder="Busque por sistemas, aplicativos, banners, planilhas..." class="w-full py-5 pl-14 pr-6 rounded-2xl text-lg outline-none shadow-xl border-4 border-white/10 bg-white focus:border-blue-400 focus:ring-4 focus:ring-blue-400/20 transition-all font-medium text-slate-700">
+                </div>
+
+                <!-- Filtros Rápidos (Categorias) -->
+                <div class="flex flex-wrap justify-center gap-2.5" id="categoryFilters">
+                    <button onclick="setCategoriaFiltro('')" class="cat-btn btn-filter-active px-5 py-2.5 rounded-xl font-bold text-sm transition-all shadow-sm" data-cat="">Tudo</button>
+                    <button onclick="setCategoriaFiltro('Sistemas')" class="cat-btn btn-filter-inactive px-5 py-2.5 rounded-xl font-bold text-sm transition-all" data-cat="Sistemas">Sistemas</button>
+                    <button onclick="setCategoriaFiltro('Aplicativos')" class="cat-btn btn-filter-inactive px-5 py-2.5 rounded-xl font-bold text-sm transition-all" data-cat="Aplicativos">Aplicativos</button>
+                    <button onclick="setCategoriaFiltro('Banners e Design')" class="cat-btn btn-filter-inactive px-5 py-2.5 rounded-xl font-bold text-sm transition-all" data-cat="Banners e Design">Banners e Design</button>
+                    <button onclick="setCategoriaFiltro('E-books e Livros')" class="cat-btn btn-filter-inactive px-5 py-2.5 rounded-xl font-bold text-sm transition-all" data-cat="E-books e Livros">E-books e Livros</button>
+                    <button onclick="setCategoriaFiltro('Planilhas')" class="cat-btn btn-filter-inactive px-5 py-2.5 rounded-xl font-bold text-sm transition-all" data-cat="Planilhas">Planilhas</button>
+                    <button onclick="setCategoriaFiltro('Templates')" class="cat-btn btn-filter-inactive px-5 py-2.5 rounded-xl font-bold text-sm transition-all" data-cat="Templates">Templates</button>
+                </div>
+            </div>
         </div>
 
+        <!-- Grade de Anúncios -->
         <div id="feedGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <div class="text-center col-span-full py-12 text-slate-400">Carregando soluções...</div>
+            <div class="text-center col-span-full py-12 text-slate-400 font-medium"><i class="fas fa-spinner fa-spin mr-2"></i> Carregando soluções...</div>
         </div>
     </main>
 
@@ -56,12 +85,13 @@
     <!-- VISÃO 2: PÁGINA DO ANÚNCIO (FUTURISTA)     -->
     <!-- ========================================== -->
     <main id="view-post" class="hidden pt-24 pb-12 px-4 md:px-8 max-w-7xl mx-auto min-h-screen">
-        <button onclick="showView('feed')" class="mb-6 text-sm font-semibold text-slate-500 hover:text-slate-900 transition flex items-center gap-2"><i class="fas fa-arrow-left"></i> Voltar ao Feed</button>
+        <button onclick="showView('feed')" class="mb-6 text-sm font-semibold text-slate-500 hover:text-slate-900 transition flex items-center gap-2"><i class="fas fa-arrow-left"></i> Voltar à Pesquisa</button>
         
         <div class="bg-white rounded-[2rem] modern-shadow border border-slate-100 overflow-hidden flex flex-col lg:flex-row min-h-[70vh]">
             <!-- Coluna Esquerda: Imagem e Descrição -->
             <div class="lg:w-3/5 bg-slate-50/50 p-6 md:p-10 flex flex-col border-b lg:border-b-0 lg:border-r border-slate-100 relative">
-                <div class="w-full bg-white rounded-2xl overflow-hidden flex items-center justify-center border border-slate-100 shadow-sm mb-8 relative group min-h-[300px]">
+                <span id="postPageCategoria" class="absolute top-10 left-10 z-10 bg-slate-900/80 backdrop-blur-md text-white text-xs font-bold px-4 py-2 rounded-xl shadow-lg uppercase tracking-wider"></span>
+                <div class="w-full bg-white rounded-2xl overflow-hidden flex items-center justify-center border border-slate-100 shadow-sm mb-8 relative group min-h-[300px] mt-12 lg:mt-0">
                     <img id="postPageImg" src="" class="w-full max-h-[500px] object-contain transition-transform duration-700 group-hover:scale-105">
                 </div>
                 <div class="flex-1">
@@ -73,10 +103,7 @@
             <!-- Coluna Direita: Ações, Avaliação e Comentários -->
             <div class="lg:w-2/5 p-6 md:p-10 flex flex-col bg-white">
                 <div class="space-y-8 flex-1">
-                    <!-- Botões Principais -->
-                    <div id="postPageActions" class="flex flex-col gap-3">
-                        <!-- Injetados via JS -->
-                    </div>
+                    <div id="postPageActions" class="flex flex-col gap-3"></div>
 
                     <hr class="border-slate-100">
 
@@ -99,9 +126,7 @@
                     <!-- Comentários da Comunidade -->
                     <div>
                         <h4 class="font-bold text-sm text-slate-400 uppercase tracking-wider mb-4">Comentários Recentes</h4>
-                        <div id="containerComentarios" class="space-y-3 max-h-64 overflow-y-auto pr-2 no-scrollbar">
-                            <!-- Injetado via JS -->
-                        </div>
+                        <div id="containerComentarios" class="space-y-3 max-h-64 overflow-y-auto pr-2 no-scrollbar"></div>
                     </div>
                 </div>
             </div>
@@ -142,7 +167,6 @@
                     <h2 class="text-2xl font-bold mb-8 text-slate-900">Aparência do seu Perfil</h2>
                     <div class="space-y-8">
                         <div class="flex flex-col sm:flex-row items-center gap-8 bg-slate-50 p-8 rounded-2xl border border-slate-100">
-                            <!-- Preview Circular -->
                             <div class="relative w-32 h-32 rounded-full overflow-hidden border-4 border-white shadow-xl flex-shrink-0 bg-slate-200">
                                 <img id="previewFotoTab" src="" class="w-full h-full object-cover">
                             </div>
@@ -182,6 +206,24 @@
                 <form id="formNovoAnuncio" class="bg-white p-8 rounded-[2rem] border border-slate-100 modern-shadow space-y-8">
                     <h2 class="text-2xl font-bold border-b border-slate-100 pb-6">Criar nova publicação</h2>
                     
+                    <!-- NOVO: Seletor de Categorias -->
+                    <div>
+                        <label class="block text-sm font-bold text-slate-700 mb-2">Categoria da Solução</label>
+                        <select id="postCategoria" class="w-full border border-slate-200 rounded-xl px-5 py-4 outline-none bg-slate-50 focus:border-blue-500 focus:ring-4 focus:ring-blue-50 font-bold text-blue-900 cursor-pointer">
+                            <option value="Sistemas">Sistemas (Web, Desktop, ERP, CRM)</option>
+                            <option value="Aplicativos">Aplicativos (Android, iOS)</option>
+                            <option value="Banners e Design">Banners, Logotipos e Identidade Visual</option>
+                            <option value="E-books e Livros">E-books, Livros e Materiais Escritos</option>
+                            <option value="Cursos e Mentorias">Cursos, Videoaulas e Mentorias</option>
+                            <option value="Planilhas">Planilhas (Excel, Google Sheets)</option>
+                            <option value="Templates">Templates (Notion, Canva, Sites)</option>
+                            <option value="Serviços Freelance">Serviços Freelance Diversos</option>
+                            <option value="Áudio e Vídeo">Edição de Vídeo, Áudio e Animação</option>
+                            <option value="Marketing e Vendas">Estratégias de Marketing, Tráfego Pago, Copy</option>
+                            <option value="Outros">Outros nichos</option>
+                        </select>
+                    </div>
+
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div><label class="block text-sm font-bold text-slate-700 mb-2">Título do Anúncio</label><input type="text" id="postTitulo" required class="w-full border border-slate-200 rounded-xl px-5 py-4 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-50 font-medium"></div>
                         <div><label class="block text-sm font-bold text-slate-700 mb-2">WhatsApp (Contato)</label><input type="text" id="postWhats" placeholder="5511999999999" class="w-full border border-slate-200 rounded-xl px-5 py-4 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-50 font-medium"></div>
@@ -262,8 +304,11 @@
         let currentUser = null;
         let userData = null;
         let postAtualId = null;
+        
+        // Estado do Filtro
+        let categoriaAtiva = "";
+        let listaPostsFeed = []; // Cache local para não bater no Firebase toda hora que digitar
 
-        // Gerenciamento de Visualizações
         window.showView = (viewId) => {
             document.getElementById('view-feed').classList.add('hidden');
             document.getElementById('view-advertiser').classList.add('hidden');
@@ -271,11 +316,10 @@
             document.getElementById('view-post').classList.add('hidden');
             
             document.getElementById(`view-${viewId}`).classList.remove('hidden');
-            if(viewId === 'feed') carregarFeed();
+            if(viewId === 'feed') baixarPostsFeed();
             window.scrollTo(0, 0);
         };
 
-        // Abas do Painel Anunciante
         window.switchTab = (tabId) => {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
             document.querySelectorAll('.tab-btn').forEach(el => {
@@ -287,7 +331,6 @@
             document.querySelector(`.tab-btn.${tabId}`).classList.remove('text-slate-500');
         };
 
-        // Autenticação
         document.getElementById('btnLogin').addEventListener('click', () => {
             signInWithPopup(auth, provider).catch(err => console.error(err));
         });
@@ -297,8 +340,7 @@
         window.goToPanel = () => {
             if(!currentUser) return;
             if(currentUser.email === ADMIN_EMAIL) {
-                showView('admin');
-                carregarListaAdmin();
+                showView('admin'); carregarListaAdmin();
             } else {
                 showView('advertiser');
             }
@@ -327,11 +369,8 @@
 
                 if(user.email !== ADMIN_EMAIL) {
                     document.getElementById('advName').innerText = userData.nome || user.displayName;
-                    
-                    // Preenche dados da Aba Perfil
                     document.getElementById('inputNomeTab').value = userData.nome || user.displayName;
                     document.getElementById('previewFotoTab').src = userData.fotoPerfil || `https://ui-avatars.com/api/?name=${encodeURIComponent(userData.nome || user.displayName)}&background=random`;
-
                     carregarMeusAnuncios();
                     
                     if(userData.gatewayKey) {
@@ -350,9 +389,6 @@
             }
         });
 
-        // ==========================================
-        // LÓGICA DO NOVO PERFIL (Aba do Anunciante)
-        // ==========================================
         document.getElementById('inputFotoTab').addEventListener('change', (e) => {
             const file = e.target.files[0];
             if(file) {
@@ -398,7 +434,6 @@
                 userData.fotoPerfil = novaFoto;
                 await updateDoc(doc(db, "usuarios", currentUser.uid), { nome: novoNome, fotoPerfil: novaFoto });
 
-                // Atualiza em Lote todos os Anúncios
                 const q = query(collection(db, "anuncios"), where("donoId", "==", currentUser.uid));
                 const snap = await getDocs(q);
                 
@@ -412,33 +447,24 @@
                 document.getElementById('advName').innerText = novoNome;
                 carregarMeusAnuncios();
             } catch (error) {
-                console.error(error);
-                alert("Erro ao atualizar.");
+                console.error(error); alert("Erro ao atualizar.");
             } finally {
                 btn.innerText = "Atualizar Perfil e Publicações"; btn.disabled = false;
             }
         };
 
-        // ==========================================
-        // LÓGICA DO ANUNCIANTE (Postagens e Gestão)
-        // ==========================================
         window.salvarConfigAnunciante = async () => {
             const key = document.getElementById('advGatewayKey').value;
             await updateDoc(doc(db, "usuarios", currentUser.uid), { gatewayKey: key });
-            alert("Configurações atualizadas!");
-            location.reload(); 
+            alert("Configurações atualizadas!"); location.reload(); 
         };
 
         document.getElementById('postTipo').addEventListener('change', (e) => {
             const divPreco = document.getElementById('divPreco');
             const divArquivo = document.getElementById('divArquivo');
-            if(e.target.value === 'pago') {
-                divPreco.classList.remove('hidden'); divArquivo.classList.remove('hidden');
-            } else if(e.target.value === 'gratis') {
-                divPreco.classList.add('hidden'); divArquivo.classList.remove('hidden');
-            } else {
-                divPreco.classList.add('hidden'); divArquivo.classList.add('hidden');
-            }
+            if(e.target.value === 'pago') { divPreco.classList.remove('hidden'); divArquivo.classList.remove('hidden'); }
+            else if(e.target.value === 'gratis') { divPreco.classList.add('hidden'); divArquivo.classList.remove('hidden'); }
+            else { divPreco.classList.add('hidden'); divArquivo.classList.add('hidden'); }
         });
 
         document.getElementById('formNovoAnuncio').addEventListener('submit', async (e) => {
@@ -475,6 +501,7 @@
                         donoNome: userData.nome || currentUser.displayName,
                         donoFoto: userData.fotoPerfil || "",
                         titulo: document.getElementById('postTitulo').value,
+                        categoria: document.getElementById('postCategoria').value, // SALVANDO A CATEGORIA
                         descricao: document.getElementById('postDesc').value,
                         whatsapp: document.getElementById('postWhats').value || userData.whatsapp,
                         tipo: document.getElementById('postTipo').value,
@@ -491,6 +518,7 @@
                     btn.innerText = "Publicar Agora"; btn.disabled = false;
                     switchTab('adv-dashboard');
                     carregarMeusAnuncios();
+                    baixarPostsFeed(); // Atualiza a rede social principal
                 };
                 img.src = event.target.result;
             };
@@ -528,6 +556,7 @@
                                 <img src="${p.imagem}" class="w-14 h-14 object-cover rounded-xl shadow-sm">
                                 <div>
                                     <h4 class="font-extrabold text-slate-800 text-lg">${p.titulo}</h4>
+                                    <span class="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded mr-1">${p.categoria || 'Geral'}</span>
                                     <span class="text-xs bg-blue-50 text-blue-600 px-2.5 py-1 rounded-md uppercase font-bold tracking-wider">${p.tipo}</span>
                                 </div>
                             </div>
@@ -547,65 +576,93 @@
 
         window.copiarLink = (id) => {
             const url = window.location.origin + window.location.pathname + "#post=" + id;
-            navigator.clipboard.writeText(url);
-            alert("Link do anúncio copiado para a área de transferência!");
+            navigator.clipboard.writeText(url); alert("Link do anúncio copiado!");
         };
 
         window.deletarAnuncio = async (id) => {
             if(confirm("Tem certeza que deseja excluir permanentemente esta publicação?")) {
                 await deleteDoc(doc(db, "anuncios", id));
                 alert("Publicação excluída com sucesso!");
-                carregarMeusAnuncios();
-                carregarFeed();
+                carregarMeusAnuncios(); baixarPostsFeed();
             }
         };
 
         // ==========================================
-        // LÓGICA DO ADMIN
+        // FILTROS E PESQUISA INTELIGENTE DO FEED
         // ==========================================
-        window.salvarTokenAdmin = async () => {
-            const token = document.getElementById('adminMpToken').value;
-            await setDoc(doc(db, "admin", "configs"), { mpToken: token });
-            alert("Token salvo!");
+        
+        window.setCategoriaFiltro = (cat) => {
+            categoriaAtiva = cat;
+            
+            // Atualiza visual dos botões
+            document.querySelectorAll('.cat-btn').forEach(btn => {
+                if(btn.dataset.cat === cat) {
+                    btn.classList.remove('btn-filter-inactive');
+                    btn.classList.add('btn-filter-active');
+                } else {
+                    btn.classList.remove('btn-filter-active');
+                    btn.classList.add('btn-filter-inactive');
+                }
+            });
+            
+            renderizarFeed();
         };
 
-        async function carregarListaAdmin() {
-            const snap = await getDocs(collection(db, "usuarios"));
-            const tbody = document.getElementById('listaAdminUsers');
-            tbody.innerHTML = "";
-            snap.forEach(doc => {
-                const d = doc.data();
-                if(d.email === ADMIN_EMAIL) return;
-                tbody.innerHTML += `<tr class="border-b border-slate-100"><td class="p-4"><b>${d.nome}</b><br><span class="text-xs">${d.email}</span></td><td class="p-4">${d.whatsapp || '--'}</td></tr>`;
+        window.filtrarFeed = () => { renderizarFeed(); };
+
+        // Baixa os posts do firebase e salva no Array local uma vez (ou ao atualizar)
+        async function baixarPostsFeed() {
+            const snap = await getDocs(collection(db, "anuncios"));
+            listaPostsFeed = [];
+            snap.forEach(docSnap => {
+                listaPostsFeed.push({ id: docSnap.id, ...docSnap.data() });
             });
+            renderizarFeed();
         }
 
-        // ==========================================
-        // LÓGICA DA REDE SOCIAL (FEED E PÁGINA DO ANÚNCIO)
-        // ==========================================
-        async function carregarFeed() {
+        // Desenha na tela baseando-se na pesquisa e filtros
+        function renderizarFeed() {
             const feed = document.getElementById('feedGrid');
-            const snap = await getDocs(collection(db, "anuncios"));
             feed.innerHTML = "";
+            const termoBusca = document.getElementById('searchInput').value.toLowerCase().trim();
             
-            if(snap.empty) { feed.innerHTML = "<p class='col-span-full text-center'>Nenhum anúncio disponível.</p>"; return; }
-
-            snap.forEach(docSnap => {
-                const p = docSnap.data();
-                const id = docSnap.id;
+            let postsFiltrados = listaPostsFeed.filter(p => {
+                // Filtro Categoria
+                if (categoriaAtiva !== "" && p.categoria !== categoriaAtiva) return false;
                 
+                // Filtro Texto Inteligente (Titulo, Descrição ou Nome do autor)
+                if (termoBusca !== "") {
+                    const tituloOk = p.titulo.toLowerCase().includes(termoBusca);
+                    const descOk = p.descricao.toLowerCase().includes(termoBusca);
+                    const autorOk = p.donoNome.toLowerCase().includes(termoBusca);
+                    if (!tituloOk && !descOk && !autorOk) return false;
+                }
+                
+                return true;
+            });
+
+            if(postsFiltrados.length === 0) {
+                feed.innerHTML = "<p class='col-span-full text-center text-slate-500 font-medium py-10 text-lg'>Nenhum resultado encontrado para a sua busca. 😢</p>"; 
+                return; 
+            }
+
+            postsFiltrados.forEach(p => {
                 let badge = "";
                 if(p.tipo === 'gratis') badge = '<span class="absolute top-4 left-4 bg-green-500 text-white text-xs font-black tracking-wider px-3 py-1.5 rounded-lg shadow-lg">GRÁTIS</span>';
                 if(p.tipo === 'pago') badge = `<span class="absolute top-4 left-4 bg-slate-900 text-white text-xs font-black tracking-wider px-3 py-1.5 rounded-lg shadow-lg">R$ ${p.preco}</span>`;
                 
+                // Badge da Categoria na Imagem
+                const badgeCat = p.categoria ? `<span class="absolute top-4 right-4 bg-white/90 backdrop-blur-sm text-slate-800 text-xs font-bold px-3 py-1.5 rounded-lg shadow-lg">${p.categoria}</span>` : '';
+
                 feed.innerHTML += `
-                    <div class="bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all border border-slate-100 cursor-pointer group flex flex-col" onclick="abrirPost('${id}')">
+                    <div class="bg-white rounded-[2rem] overflow-hidden shadow-sm hover:shadow-2xl transition-all border border-slate-100 cursor-pointer group flex flex-col hover:-translate-y-1 duration-300" onclick="abrirPost('${p.id}')">
                         <div class="h-64 overflow-hidden relative bg-slate-50">
                             ${badge}
+                            ${badgeCat}
                             <img src="${p.imagem}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700">
                         </div>
                         <div class="p-6 flex-1 flex flex-col">
-                            <h3 class="text-xl font-extrabold text-slate-900 mb-2 line-clamp-1 leading-tight">${p.titulo}</h3>
+                            <h3 class="text-xl font-extrabold text-slate-900 mb-2 line-clamp-1 leading-tight group-hover:text-blue-600 transition-colors">${p.titulo}</h3>
                             <p class="text-slate-500 text-sm line-clamp-2 mb-6 flex-1 leading-relaxed">${p.descricao}</p>
                             <div class="flex items-center justify-between border-t border-slate-100 pt-5">
                                 <div class="flex items-center gap-3">
@@ -619,17 +676,14 @@
             });
         }
 
-        // Sistema de 6 Estrelas
         window.setNota = (nota) => {
             document.getElementById('inputNota').value = nota;
             const stars = document.querySelectorAll('.star-btn');
             stars.forEach((star, index) => {
                 if (index < nota) {
-                    star.classList.remove('text-slate-200');
-                    star.classList.add('text-yellow-400');
+                    star.classList.remove('text-slate-200'); star.classList.add('text-yellow-400');
                 } else {
-                    star.classList.remove('text-yellow-400');
-                    star.classList.add('text-slate-200');
+                    star.classList.remove('text-yellow-400'); star.classList.add('text-slate-200');
                 }
             });
         };
@@ -637,11 +691,12 @@
         window.abrirPost = async (postId) => {
             postAtualId = postId;
             showView('post');
-            setNota(6); // Reseta as estrelas
+            setNota(6); 
 
             document.getElementById('postPageImg').src = "";
             document.getElementById('postPageTitulo').innerText = "Carregando...";
             document.getElementById('postPageDesc').innerText = "";
+            document.getElementById('postPageCategoria').innerText = "";
             document.getElementById('containerComentarios').innerHTML = "<p class='text-slate-400 text-sm'>Carregando avaliações...</p>";
             document.getElementById('postPageActions').innerHTML = "";
 
@@ -652,21 +707,22 @@
             document.getElementById('postPageImg').src = p.imagem;
             document.getElementById('postPageTitulo').innerText = p.titulo;
             document.getElementById('postPageDesc').innerText = p.descricao;
+            
+            // Exibir categoria na pagina
+            if(p.categoria) {
+                document.getElementById('postPageCategoria').innerText = p.categoria;
+                document.getElementById('postPageCategoria').classList.remove('hidden');
+            } else {
+                document.getElementById('postPageCategoria').classList.add('hidden');
+            }
 
             await carregarComentariosPost(postId);
 
             const actionsDiv = document.getElementById('postPageActions');
-            
-            if(p.whatsapp) {
-                actionsDiv.innerHTML += `<a href="https://wa.me/${p.whatsapp}" target="_blank" class="w-full py-4 bg-green-500 hover:bg-green-600 text-white text-center rounded-2xl font-bold flex items-center justify-center gap-3 transition-colors shadow-lg shadow-green-500/30 text-lg"><i class="fab fa-whatsapp text-2xl"></i> Falar no WhatsApp</a>`;
-            }
-            
+            if(p.whatsapp) actionsDiv.innerHTML += `<a href="https://wa.me/${p.whatsapp}" target="_blank" class="w-full py-4 bg-green-500 hover:bg-green-600 text-white text-center rounded-2xl font-bold flex items-center justify-center gap-3 transition-colors shadow-lg shadow-green-500/30 text-lg"><i class="fab fa-whatsapp text-2xl"></i> Falar no WhatsApp</a>`;
             if(p.tipo === 'gratis') {
-                if(p.arquivoData) {
-                    actionsDiv.innerHTML += `<a href="${p.arquivoData}" download="${p.arquivoNome || 'arquivo'}" class="w-full py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl font-bold flex items-center justify-center gap-3 transition-colors text-center shadow-lg shadow-blue-500/30 text-lg"><i class="fas fa-download text-xl"></i> Baixar Arquivo Grátis</a>`;
-                } else {
-                    actionsDiv.innerHTML += `<button class="w-full py-4 bg-slate-100 text-slate-400 rounded-2xl font-bold cursor-not-allowed">Nenhum arquivo disponível</button>`;
-                }
+                if(p.arquivoData) actionsDiv.innerHTML += `<a href="${p.arquivoData}" download="${p.arquivoNome || 'arquivo'}" class="w-full py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl font-bold flex items-center justify-center gap-3 transition-colors text-center shadow-lg shadow-blue-500/30 text-lg"><i class="fas fa-download text-xl"></i> Baixar Arquivo Grátis</a>`;
+                else actionsDiv.innerHTML += `<button class="w-full py-4 bg-slate-100 text-slate-400 rounded-2xl font-bold cursor-not-allowed">Nenhum arquivo disponível</button>`;
             } else if(p.tipo === 'pago') {
                 actionsDiv.innerHTML += `<button onclick="alert('Integração com pagamento em breve!')" class="w-full py-4 bg-slate-900 hover:bg-slate-800 text-white rounded-2xl font-bold flex items-center justify-center gap-3 transition-colors shadow-lg shadow-slate-900/30 text-lg"><i class="fas fa-shopping-cart text-xl"></i> Comprar Agora (R$ ${p.preco})</button>`;
             }
@@ -676,26 +732,14 @@
             const commSnap = await getDocs(collection(db, `anuncios/${postId}/comentarios`));
             const container = document.getElementById('containerComentarios');
             container.innerHTML = "";
-            
             let count = 0;
             commSnap.forEach(c => {
                 count++;
                 const cd = c.data();
                 let stars = '★'.repeat(cd.nota) + '☆'.repeat(6 - cd.nota);
-                container.innerHTML += `
-                    <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100 shadow-sm">
-                        <div class="flex justify-between items-center mb-2">
-                            <span class="font-bold text-slate-800 text-sm">${cd.usuario}</span>
-                            <span class="text-yellow-400 text-lg tracking-widest">${stars}</span>
-                        </div>
-                        <p class="text-slate-600 text-sm leading-relaxed">${cd.texto}</p>
-                    </div>
-                `;
+                container.innerHTML += `<div class="bg-slate-50 p-4 rounded-2xl border border-slate-100 shadow-sm"><div class="flex justify-between items-center mb-2"><span class="font-bold text-slate-800 text-sm">${cd.usuario}</span><span class="text-yellow-400 text-lg tracking-widest">${stars}</span></div><p class="text-slate-600 text-sm leading-relaxed">${cd.texto}</p></div>`;
             });
-
-            if(count === 0) {
-                container.innerHTML = `<p class='text-slate-400 text-sm italic'>Nenhuma avaliação ainda. Seja o primeiro a compartilhar sua experiência!</p>`;
-            }
+            if(count === 0) container.innerHTML = `<p class='text-slate-400 text-sm italic'>Nenhuma avaliação ainda. Seja o primeiro!</p>`;
         }
 
         document.getElementById('btnEnviarComentario').addEventListener('click', async () => {
@@ -722,8 +766,10 @@
             carregarComentariosPost(postAtualId);
         });
 
-        // Inicia o App
-        carregarFeed();
+        // ==========================================
+        // INIT
+        // ==========================================
+        baixarPostsFeed();
     </script>
 </body>
 </html>
