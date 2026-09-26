@@ -8,35 +8,59 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
-        body { font-family: 'Inter', sans-serif; background-color: #F8FAFC; }
+        
+        /* Fundo da página inteira */
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 50%, #1e293b 100%);
+            background-attachment: fixed;
+            color: #ffffff;
+        }
         
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         
-        .glass-panel { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.5); }
-        .modern-shadow { box-shadow: 0 20px 40px -15px rgba(0,0,0,0.05); }
+        /* Navbar Glass (Dark) */
+        .glass-panel { background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(16px); border-bottom: 1px solid rgba(255, 255, 255, 0.1); }
+        
+        /* Filtros */
+        .btn-filter-active { background-color: #ffffff; color: #1e3a8a; box-shadow: 0 4px 15px rgba(255,255,255,0.2); transform: scale(1.05); }
+        .btn-filter-inactive { background-color: rgba(255,255,255,0.1); color: #ffffff; backdrop-filter: blur(4px); border: 1px solid rgba(255,255,255,0.2); }
+        .btn-filter-inactive:hover { background-color: rgba(255,255,255,0.2); transform: translateY(-2px); }
 
-        /* Classes ativas para os filtros */
-        .btn-filter-active { background-color: #ffffff; color: #0f172a; }
-        .btn-filter-inactive { background-color: rgba(255,255,255,0.15); color: #ffffff; backdrop-filter: blur(4px); }
-        .btn-filter-inactive:hover { background-color: rgba(255,255,255,0.25); }
+        /* Animações Top */
+        @keyframes fadeUp {
+            0% { opacity: 0; transform: translateY(30px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes fadeIn {
+            0% { opacity: 0; }
+            100% { opacity: 1; }
+        }
+        .animate-fade-up { animation: fadeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; opacity: 0; }
+        .animate-fade-in { animation: fadeIn 0.8s ease-out forwards; }
+        
+        /* Atrasos para cascata nos cards */
+        .delay-1 { animation-delay: 0.1s; }
+        .delay-2 { animation-delay: 0.2s; }
+        .delay-3 { animation-delay: 0.3s; }
     </style>
 </head>
-<body class="text-slate-800 antialiased overflow-x-hidden">
+<body class="antialiased overflow-x-hidden min-h-screen">
 
-    <!-- NAVBAR PRINCIPAL -->
-    <nav class="fixed top-0 w-full glass-panel z-40 h-16 flex items-center justify-between px-6 md:px-12 transition-all shadow-sm">
+    <!-- NAVBAR -->
+    <nav class="fixed top-0 w-full glass-panel z-40 h-16 flex items-center justify-between px-6 md:px-12 transition-all">
         <div class="flex items-center gap-2 cursor-pointer" onclick="showView('feed')">
-            <div class="w-8 h-8 bg-blue-600 rounded-xl flex items-center justify-center text-white font-bold shadow-lg shadow-blue-500/30"><i class="fas fa-link"></i></div>
-            <h1 class="text-xl font-extrabold tracking-tight text-slate-900">Pro<span class="text-blue-600">Connect</span></h1>
+            <div class="w-8 h-8 bg-white rounded-xl flex items-center justify-center text-blue-900 font-bold shadow-lg shadow-blue-500/30"><i class="fas fa-link"></i></div>
+            <h1 class="text-xl font-extrabold tracking-tight text-white">Pro<span class="text-blue-400">Connect</span></h1>
         </div>
         
         <div class="flex items-center gap-4">
-            <button id="btnNavPanel" class="hidden text-sm font-semibold text-slate-600 hover:text-blue-600 transition-colors" onclick="goToPanel()">Meu Painel</button>
-            <button id="btnLogin" class="px-5 py-2 bg-slate-900 hover:bg-slate-800 text-white text-sm font-medium rounded-full transition-all flex items-center gap-2 shadow-md">
+            <button id="btnNavPanel" class="hidden text-sm font-semibold text-slate-300 hover:text-white transition-colors" onclick="goToPanel()">Meu Painel</button>
+            <button id="btnLogin" class="px-5 py-2 bg-white hover:bg-slate-100 text-blue-900 text-sm font-bold rounded-full transition-all flex items-center gap-2 shadow-md">
                 <i class="fab fa-google"></i> Login
             </button>
-            <button id="btnLogout" class="hidden px-5 py-2 border border-slate-200 text-slate-600 hover:bg-slate-50 text-sm font-medium rounded-full transition-all" onclick="logout()">
+            <button id="btnLogout" class="hidden px-5 py-2 border border-white/20 text-white hover:bg-white/10 text-sm font-medium rounded-full transition-all" onclick="logout()">
                 Sair
             </button>
         </div>
@@ -45,52 +69,57 @@
     <!-- ========================================== -->
     <!-- VISÃO 1: REDE SOCIAL (FEED)                -->
     <!-- ========================================== -->
-    <main id="view-feed" class="pt-24 pb-12 px-4 md:px-8 max-w-7xl mx-auto block">
+    <main id="view-feed" class="pt-28 pb-12 px-4 md:px-8 max-w-7xl mx-auto block">
         
+        <!-- Elementos decorativos do fundo -->
+        <div class="fixed top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none">
+            <div class="absolute top-20 -right-32 w-96 h-96 bg-blue-500/20 rounded-full blur-[100px]"></div>
+            <div class="absolute bottom-20 -left-32 w-[500px] h-[500px] bg-purple-600/20 rounded-full blur-[120px]"></div>
+        </div>
+
         <!-- HERO SECTION (PESQUISA E FILTROS) -->
-        <div class="relative bg-gradient-to-br from-slate-900 via-blue-900 to-slate-800 rounded-[2.5rem] p-8 md:p-16 mb-12 shadow-2xl overflow-hidden">
-            <!-- Elementos decorativos de fundo -->
-            <div class="absolute -top-32 -right-32 w-96 h-96 bg-blue-500/30 rounded-full blur-3xl pointer-events-none"></div>
-            <div class="absolute -bottom-32 -left-32 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="relative z-10 text-center max-w-5xl mx-auto mb-16 animate-fade-in">
+            <h2 class="text-4xl md:text-6xl font-extrabold text-white mb-6 tracking-tight leading-tight">O que você está buscando hoje?</h2>
+            
+            <!-- Barra de Pesquisa -->
+            <div class="relative flex items-center max-w-3xl mx-auto mb-10">
+                <i class="fas fa-search absolute left-6 text-slate-400 text-xl z-10"></i>
+                <input type="text" id="searchInput" onkeyup="filtrarFeed()" placeholder="Busque por sistemas, aplicativos, banners, planilhas..." class="w-full py-5 pl-14 pr-6 rounded-2xl text-lg outline-none shadow-2xl border-2 border-white/20 bg-white/95 focus:bg-white text-slate-900 focus:border-blue-400 focus:ring-4 focus:ring-blue-400/30 transition-all font-medium placeholder:text-slate-500">
+            </div>
 
-            <div class="relative z-10 text-center max-w-4xl mx-auto">
-                <h2 class="text-3xl md:text-5xl font-extrabold text-white mb-8 tracking-tight leading-tight">O que você está buscando hoje?</h2>
-                
-                <!-- Barra de Pesquisa -->
-                <div class="relative flex items-center max-w-2xl mx-auto mb-8">
-                    <i class="fas fa-search absolute left-6 text-slate-400 text-xl"></i>
-                    <input type="text" id="searchInput" onkeyup="filtrarFeed()" placeholder="Busque por sistemas, aplicativos, banners, planilhas..." class="w-full py-5 pl-14 pr-6 rounded-2xl text-lg outline-none shadow-xl border-4 border-white/10 bg-white focus:border-blue-400 focus:ring-4 focus:ring-blue-400/20 transition-all font-medium text-slate-700">
-                </div>
-
-                <!-- Filtros Rápidos (Categorias) -->
-                <div class="flex flex-wrap justify-center gap-2.5" id="categoryFilters">
-                    <button onclick="setCategoriaFiltro('')" class="cat-btn btn-filter-active px-5 py-2.5 rounded-xl font-bold text-sm transition-all shadow-sm" data-cat="">Tudo</button>
-                    <button onclick="setCategoriaFiltro('Sistemas')" class="cat-btn btn-filter-inactive px-5 py-2.5 rounded-xl font-bold text-sm transition-all" data-cat="Sistemas">Sistemas</button>
-                    <button onclick="setCategoriaFiltro('Aplicativos')" class="cat-btn btn-filter-inactive px-5 py-2.5 rounded-xl font-bold text-sm transition-all" data-cat="Aplicativos">Aplicativos</button>
-                    <button onclick="setCategoriaFiltro('Banners e Design')" class="cat-btn btn-filter-inactive px-5 py-2.5 rounded-xl font-bold text-sm transition-all" data-cat="Banners e Design">Banners e Design</button>
-                    <button onclick="setCategoriaFiltro('E-books e Livros')" class="cat-btn btn-filter-inactive px-5 py-2.5 rounded-xl font-bold text-sm transition-all" data-cat="E-books e Livros">E-books e Livros</button>
-                    <button onclick="setCategoriaFiltro('Planilhas')" class="cat-btn btn-filter-inactive px-5 py-2.5 rounded-xl font-bold text-sm transition-all" data-cat="Planilhas">Planilhas</button>
-                    <button onclick="setCategoriaFiltro('Templates')" class="cat-btn btn-filter-inactive px-5 py-2.5 rounded-xl font-bold text-sm transition-all" data-cat="Templates">Templates</button>
-                </div>
+            <!-- Filtros Rápidos (Categorias Completas) -->
+            <div class="flex flex-wrap justify-center gap-3" id="categoryFilters">
+                <button onclick="setCategoriaFiltro('')" class="cat-btn btn-filter-active px-5 py-2.5 rounded-xl font-bold text-sm transition-all duration-300" data-cat="">Tudo</button>
+                <button onclick="setCategoriaFiltro('Sistemas')" class="cat-btn btn-filter-inactive px-5 py-2.5 rounded-xl font-bold text-sm transition-all duration-300" data-cat="Sistemas">Sistemas</button>
+                <button onclick="setCategoriaFiltro('Aplicativos')" class="cat-btn btn-filter-inactive px-5 py-2.5 rounded-xl font-bold text-sm transition-all duration-300" data-cat="Aplicativos">Aplicativos</button>
+                <button onclick="setCategoriaFiltro('Banners e Design')" class="cat-btn btn-filter-inactive px-5 py-2.5 rounded-xl font-bold text-sm transition-all duration-300" data-cat="Banners e Design">Banners e Design</button>
+                <button onclick="setCategoriaFiltro('E-books e Livros')" class="cat-btn btn-filter-inactive px-5 py-2.5 rounded-xl font-bold text-sm transition-all duration-300" data-cat="E-books e Livros">E-books e Livros</button>
+                <button onclick="setCategoriaFiltro('Cursos e Mentorias')" class="cat-btn btn-filter-inactive px-5 py-2.5 rounded-xl font-bold text-sm transition-all duration-300" data-cat="Cursos e Mentorias">Cursos e Mentorias</button>
+                <button onclick="setCategoriaFiltro('Planilhas')" class="cat-btn btn-filter-inactive px-5 py-2.5 rounded-xl font-bold text-sm transition-all duration-300" data-cat="Planilhas">Planilhas</button>
+                <button onclick="setCategoriaFiltro('Templates')" class="cat-btn btn-filter-inactive px-5 py-2.5 rounded-xl font-bold text-sm transition-all duration-300" data-cat="Templates">Templates</button>
+                <button onclick="setCategoriaFiltro('Serviços Freelance')" class="cat-btn btn-filter-inactive px-5 py-2.5 rounded-xl font-bold text-sm transition-all duration-300" data-cat="Serviços Freelance">Serviços Freelance</button>
+                <button onclick="setCategoriaFiltro('Áudio e Vídeo')" class="cat-btn btn-filter-inactive px-5 py-2.5 rounded-xl font-bold text-sm transition-all duration-300" data-cat="Áudio e Vídeo">Áudio e Vídeo</button>
+                <button onclick="setCategoriaFiltro('Marketing e Vendas')" class="cat-btn btn-filter-inactive px-5 py-2.5 rounded-xl font-bold text-sm transition-all duration-300" data-cat="Marketing e Vendas">Marketing e Vendas</button>
+                <button onclick="setCategoriaFiltro('Outros')" class="cat-btn btn-filter-inactive px-5 py-2.5 rounded-xl font-bold text-sm transition-all duration-300" data-cat="Outros">Outros</button>
             </div>
         </div>
 
         <!-- Grade de Anúncios -->
         <div id="feedGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <div class="text-center col-span-full py-12 text-slate-400 font-medium"><i class="fas fa-spinner fa-spin mr-2"></i> Carregando soluções...</div>
+            <div class="text-center col-span-full py-12 text-white/70 font-medium"><i class="fas fa-spinner fa-spin mr-2"></i> Carregando soluções...</div>
         </div>
     </main>
 
     <!-- ========================================== -->
-    <!-- VISÃO 2: PÁGINA DO ANÚNCIO (FUTURISTA)     -->
+    <!-- VISÃO 2: PÁGINA DO ANÚNCIO                 -->
     <!-- ========================================== -->
-    <main id="view-post" class="hidden pt-24 pb-12 px-4 md:px-8 max-w-7xl mx-auto min-h-screen">
-        <button onclick="showView('feed')" class="mb-6 text-sm font-semibold text-slate-500 hover:text-slate-900 transition flex items-center gap-2"><i class="fas fa-arrow-left"></i> Voltar à Pesquisa</button>
+    <main id="view-post" class="hidden pt-24 pb-12 px-4 md:px-8 max-w-7xl mx-auto min-h-screen text-slate-800">
+        <button onclick="showView('feed')" class="mb-6 text-sm font-bold text-white hover:text-blue-200 transition flex items-center gap-2"><i class="fas fa-arrow-left"></i> Voltar à Pesquisa</button>
         
-        <div class="bg-white rounded-[2rem] modern-shadow border border-slate-100 overflow-hidden flex flex-col lg:flex-row min-h-[70vh]">
+        <div class="bg-white rounded-[2rem] shadow-2xl border border-slate-100 overflow-hidden flex flex-col lg:flex-row min-h-[70vh] animate-fade-up">
             <!-- Coluna Esquerda: Imagem e Descrição -->
             <div class="lg:w-3/5 bg-slate-50/50 p-6 md:p-10 flex flex-col border-b lg:border-b-0 lg:border-r border-slate-100 relative">
-                <span id="postPageCategoria" class="absolute top-10 left-10 z-10 bg-slate-900/80 backdrop-blur-md text-white text-xs font-bold px-4 py-2 rounded-xl shadow-lg uppercase tracking-wider"></span>
+                <span id="postPageCategoria" class="absolute top-10 left-10 z-10 bg-gradient-to-r from-blue-700 to-blue-900 text-white text-xs font-bold px-4 py-2 rounded-xl shadow-lg uppercase tracking-wider hidden"></span>
                 <div class="w-full bg-white rounded-2xl overflow-hidden flex items-center justify-center border border-slate-100 shadow-sm mb-8 relative group min-h-[300px] mt-12 lg:mt-0">
                     <img id="postPageImg" src="" class="w-full max-h-[500px] object-contain transition-transform duration-700 group-hover:scale-105">
                 </div>
@@ -107,7 +136,7 @@
 
                     <hr class="border-slate-100">
 
-                    <!-- Área de Avaliação 6 Estrelas -->
+                    <!-- Área de Avaliação -->
                     <div class="bg-slate-50 rounded-2xl p-6 border border-slate-100">
                         <h3 class="font-bold text-slate-800 mb-2">Avalie esta solução</h3>
                         <div id="starContainer" class="flex items-center gap-2 text-slate-200 text-3xl cursor-pointer mb-4">
@@ -120,7 +149,7 @@
                         </div>
                         <input type="hidden" id="inputNota" value="6">
                         <textarea id="inputComentario" class="w-full bg-white border border-slate-200 rounded-xl p-4 text-sm outline-none focus:ring-2 focus:ring-blue-500 mb-3 transition-shadow" rows="3" placeholder="Compartilhe sua experiência..."></textarea>
-                        <button id="btnEnviarComentario" class="w-full py-3 bg-slate-900 text-white rounded-xl text-sm font-bold hover:bg-slate-800 transition-colors shadow-lg shadow-slate-900/20">Publicar Avaliação</button>
+                        <button id="btnEnviarComentario" class="w-full py-3 bg-blue-900 text-white rounded-xl text-sm font-bold hover:bg-blue-800 transition-colors shadow-lg shadow-blue-900/20">Publicar Avaliação</button>
                     </div>
 
                     <!-- Comentários da Comunidade -->
@@ -136,25 +165,26 @@
     <!-- ========================================== -->
     <!-- VISÃO 3: PAINEL DO ANUNCIANTE (CREATOR)    -->
     <!-- ========================================== -->
-    <main id="view-advertiser" class="hidden pt-16 h-screen flex">
-        <aside class="w-64 bg-white border-r border-slate-200 flex flex-col pt-6 hidden md:flex z-10 shadow-[4px_0_24px_rgba(0,0,0,0.02)]">
+    <main id="view-advertiser" class="hidden pt-16 h-screen flex text-slate-800">
+        <aside class="w-64 bg-white border-r border-slate-200 flex flex-col pt-6 hidden md:flex z-10 shadow-xl">
             <div class="px-6 mb-8">
                 <span class="text-xs font-bold text-blue-600 tracking-wider uppercase bg-blue-50 px-3 py-1.5 rounded-lg">Painel Creator</span>
             </div>
             <nav class="flex-1 px-4 space-y-2">
-                <button onclick="switchTab('adv-dashboard')" class="tab-btn adv-dashboard w-full flex items-center gap-3 px-4 py-3 bg-slate-50 text-slate-900 rounded-xl font-semibold text-left transition-all"><i class="fas fa-home w-5"></i> Início</button>
-                <button onclick="switchTab('adv-new')" class="tab-btn adv-new w-full flex items-center gap-3 px-4 py-3 text-slate-500 hover:bg-slate-50 hover:text-slate-900 rounded-xl font-semibold text-left transition-all"><i class="fas fa-plus w-5"></i> Publicar</button>
-                <button onclick="switchTab('adv-config')" class="tab-btn adv-config w-full flex items-center gap-3 px-4 py-3 text-slate-500 hover:bg-slate-50 hover:text-slate-900 rounded-xl font-semibold text-left transition-all"><i class="fas fa-cog w-5"></i> Pagamentos</button>
-                <button onclick="switchTab('adv-perfil')" class="tab-btn adv-perfil w-full flex items-center gap-3 px-4 py-3 text-slate-500 hover:bg-slate-50 hover:text-slate-900 rounded-xl font-semibold text-left transition-all"><i class="fas fa-user-edit w-5"></i> Meu Perfil</button>
+                <button onclick="switchTab('adv-dashboard')" class="tab-btn adv-dashboard w-full flex items-center gap-3 px-4 py-3 bg-slate-50 text-slate-900 rounded-xl font-bold text-left transition-all"><i class="fas fa-home w-5"></i> Início</button>
+                <button onclick="switchTab('adv-new')" class="tab-btn adv-new w-full flex items-center gap-3 px-4 py-3 text-slate-500 hover:bg-slate-50 hover:text-slate-900 rounded-xl font-bold text-left transition-all"><i class="fas fa-plus w-5"></i> Publicar</button>
+                <button onclick="switchTab('adv-config')" class="tab-btn adv-config w-full flex items-center gap-3 px-4 py-3 text-slate-500 hover:bg-slate-50 hover:text-slate-900 rounded-xl font-bold text-left transition-all"><i class="fas fa-cog w-5"></i> Pagamentos</button>
+                <button onclick="switchTab('adv-perfil')" class="tab-btn adv-perfil w-full flex items-center gap-3 px-4 py-3 text-slate-500 hover:bg-slate-50 hover:text-slate-900 rounded-xl font-bold text-left transition-all"><i class="fas fa-user-edit w-5"></i> Meu Perfil</button>
             </nav>
         </aside>
 
-        <div class="flex-1 overflow-y-auto bg-slate-50/50 p-8">
+        <!-- Fundo branco para não conflitar com o gradiente da pagina no painel -->
+        <div class="flex-1 overflow-y-auto bg-slate-50 p-8 rounded-tl-3xl shadow-inner border-l border-white/20">
             <!-- Tab Início -->
-            <div id="adv-dashboard" class="tab-content block max-w-4xl mx-auto space-y-6">
-                <h2 class="text-3xl font-extrabold tracking-tight">Bem-vindo, <span id="advName" class="text-blue-600">Anunciante</span></h2>
-                <div class="bg-white p-8 rounded-[2rem] border border-slate-100 modern-shadow">
-                    <h3 class="text-xl font-bold mb-6">Suas Publicações</h3>
+            <div id="adv-dashboard" class="tab-content block max-w-4xl mx-auto space-y-6 animate-fade-in">
+                <h2 class="text-3xl font-extrabold tracking-tight text-slate-900">Bem-vindo, <span id="advName" class="text-blue-600">Anunciante</span></h2>
+                <div class="bg-white p-8 rounded-[2rem] border border-slate-200 shadow-sm">
+                    <h3 class="text-xl font-bold mb-6 text-slate-800">Suas Publicações</h3>
                     <div id="meusAnunciosLista" class="space-y-4">
                         <p class="text-slate-400 text-sm">Carregando seus anúncios...</p>
                     </div>
@@ -162,8 +192,8 @@
             </div>
 
             <!-- Tab Meu Perfil -->
-            <div id="adv-perfil" class="tab-content hidden max-w-4xl mx-auto space-y-6">
-                <div class="bg-white p-8 rounded-[2rem] border border-slate-100 modern-shadow">
+            <div id="adv-perfil" class="tab-content hidden max-w-4xl mx-auto space-y-6 animate-fade-in">
+                <div class="bg-white p-8 rounded-[2rem] border border-slate-200 shadow-sm">
                     <h2 class="text-2xl font-bold mb-8 text-slate-900">Aparência do seu Perfil</h2>
                     <div class="space-y-8">
                         <div class="flex flex-col sm:flex-row items-center gap-8 bg-slate-50 p-8 rounded-2xl border border-slate-100">
@@ -178,7 +208,7 @@
                         </div>
                         <div>
                             <label class="block text-sm font-bold text-slate-700 mb-2">Nome de Exibição</label>
-                            <input type="text" id="inputNomeTab" class="w-full border border-slate-200 rounded-xl px-5 py-4 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-50 transition-all font-medium">
+                            <input type="text" id="inputNomeTab" class="w-full border border-slate-200 rounded-xl px-5 py-4 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-50 transition-all font-medium bg-white text-slate-900">
                         </div>
                         <button onclick="salvarPerfilTab()" id="btnSalvarPerfilTab" class="w-full py-4 bg-slate-900 text-white rounded-xl font-bold hover:bg-slate-800 transition-all shadow-lg shadow-slate-900/20">Atualizar Perfil e Publicações</button>
                     </div>
@@ -186,15 +216,15 @@
             </div>
 
             <!-- Tab Configurações -->
-            <div id="adv-config" class="tab-content hidden max-w-4xl mx-auto space-y-6">
-                <div class="bg-white p-8 rounded-[2rem] border border-slate-100 modern-shadow">
-                    <h2 class="text-2xl font-bold mb-2">Gateway de Pagamento</h2>
+            <div id="adv-config" class="tab-content hidden max-w-4xl mx-auto space-y-6 animate-fade-in">
+                <div class="bg-white p-8 rounded-[2rem] border border-slate-200 shadow-sm">
+                    <h2 class="text-2xl font-bold mb-2 text-slate-900">Gateway de Pagamento</h2>
                     <p class="text-slate-500 text-sm mb-8">Conecte sua conta para vender produtos digitais pagos de forma automática.</p>
                     
                     <div class="space-y-4">
                         <div>
                             <label class="block text-sm font-bold text-slate-700 mb-2">Chave Pública (Public Key)</label>
-                            <input type="text" id="advGatewayKey" class="w-full border border-slate-200 rounded-xl px-5 py-4 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-50 transition-all font-medium" placeholder="APP_USR-...">
+                            <input type="text" id="advGatewayKey" class="w-full border border-slate-200 rounded-xl px-5 py-4 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-50 transition-all font-medium bg-white text-slate-900" placeholder="APP_USR-...">
                         </div>
                         <button onclick="salvarConfigAnunciante()" class="px-8 py-3.5 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 shadow-lg shadow-blue-500/30 transition-all">Salvar Chave</button>
                     </div>
@@ -202,11 +232,10 @@
             </div>
 
             <!-- Tab Novo Anúncio -->
-            <div id="adv-new" class="tab-content hidden max-w-4xl mx-auto space-y-6">
-                <form id="formNovoAnuncio" class="bg-white p-8 rounded-[2rem] border border-slate-100 modern-shadow space-y-8">
-                    <h2 class="text-2xl font-bold border-b border-slate-100 pb-6">Criar nova publicação</h2>
+            <div id="adv-new" class="tab-content hidden max-w-4xl mx-auto space-y-6 animate-fade-in">
+                <form id="formNovoAnuncio" class="bg-white p-8 rounded-[2rem] border border-slate-200 shadow-sm space-y-8">
+                    <h2 class="text-2xl font-bold border-b border-slate-100 pb-6 text-slate-900">Criar nova publicação</h2>
                     
-                    <!-- NOVO: Seletor de Categorias -->
                     <div>
                         <label class="block text-sm font-bold text-slate-700 mb-2">Categoria da Solução</label>
                         <select id="postCategoria" class="w-full border border-slate-200 rounded-xl px-5 py-4 outline-none bg-slate-50 focus:border-blue-500 focus:ring-4 focus:ring-blue-50 font-bold text-blue-900 cursor-pointer">
@@ -225,16 +254,16 @@
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div><label class="block text-sm font-bold text-slate-700 mb-2">Título do Anúncio</label><input type="text" id="postTitulo" required class="w-full border border-slate-200 rounded-xl px-5 py-4 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-50 font-medium"></div>
-                        <div><label class="block text-sm font-bold text-slate-700 mb-2">WhatsApp (Contato)</label><input type="text" id="postWhats" placeholder="5511999999999" class="w-full border border-slate-200 rounded-xl px-5 py-4 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-50 font-medium"></div>
+                        <div><label class="block text-sm font-bold text-slate-700 mb-2">Título do Anúncio</label><input type="text" id="postTitulo" required class="w-full border border-slate-200 rounded-xl px-5 py-4 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-50 font-medium bg-white text-slate-900"></div>
+                        <div><label class="block text-sm font-bold text-slate-700 mb-2">WhatsApp (Contato)</label><input type="text" id="postWhats" placeholder="5511999999999" class="w-full border border-slate-200 rounded-xl px-5 py-4 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-50 font-medium bg-white text-slate-900"></div>
                     </div>
                     
-                    <div><label class="block text-sm font-bold text-slate-700 mb-2">Descrição Completa</label><textarea id="postDesc" required rows="5" class="w-full border border-slate-200 rounded-xl px-5 py-4 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-50 font-medium"></textarea></div>
+                    <div><label class="block text-sm font-bold text-slate-700 mb-2">Descrição Completa</label><textarea id="postDesc" required rows="5" class="w-full border border-slate-200 rounded-xl px-5 py-4 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-50 font-medium bg-white text-slate-900"></textarea></div>
 
                     <div class="p-6 bg-slate-50 rounded-2xl border border-slate-100 space-y-5">
                         <div>
                             <label class="block text-sm font-bold text-slate-700 mb-2">Formato de Entrega</label>
-                            <select id="postTipo" class="w-full border border-slate-200 rounded-xl px-5 py-4 outline-none bg-white focus:border-blue-500 font-medium cursor-pointer">
+                            <select id="postTipo" class="w-full border border-slate-200 rounded-xl px-5 py-4 outline-none bg-white focus:border-blue-500 font-medium cursor-pointer text-slate-900">
                                 <option value="servico">Apenas Divulgação de Serviço</option>
                                 <option value="gratis">Produto Digital (Download Grátis)</option>
                                 <option value="pago" id="optPago" disabled>Produto Digital (Venda) - Requer Gateway</option>
@@ -243,7 +272,7 @@
                         </div>
                         <div id="divPreco" class="hidden">
                             <label class="block text-sm font-bold text-slate-700 mb-2">Preço (R$)</label>
-                            <input type="number" id="postPreco" step="0.01" class="w-full border border-slate-200 rounded-xl px-5 py-4 outline-none focus:border-blue-500 font-medium">
+                            <input type="number" id="postPreco" step="0.01" class="w-full border border-slate-200 rounded-xl px-5 py-4 outline-none focus:border-blue-500 font-medium bg-white text-slate-900">
                         </div>
                         <div id="divArquivo" class="hidden">
                             <label class="block text-sm font-bold text-slate-700 mb-2">Anexar Arquivo para Download</label>
@@ -265,7 +294,7 @@
     <!-- ========================================== -->
     <!-- VISÃO 4: PAINEL DE GESTÃO (ADMIN)          -->
     <!-- ========================================== -->
-    <main id="view-admin" class="hidden pt-16 h-screen flex">
+    <main id="view-admin" class="hidden pt-16 h-screen flex text-slate-800">
         <aside class="w-64 bg-slate-900 text-white flex flex-col pt-6 hidden md:flex">
             <div class="px-6 mb-6"><span class="text-xs font-bold text-red-400 tracking-wider uppercase bg-slate-800 px-2 py-1 rounded">Gestão Admin</span></div>
             <nav class="flex-1 px-4 space-y-1">
@@ -276,14 +305,14 @@
         <div class="flex-1 overflow-y-auto bg-slate-50 p-8">
             <div class="max-w-5xl mx-auto space-y-8">
                 <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-                    <h2 class="text-xl font-bold mb-4">Cobrança da Plataforma</h2>
+                    <h2 class="text-xl font-bold mb-4 text-slate-900">Cobrança da Plataforma</h2>
                     <div class="flex gap-4">
-                        <input type="text" id="adminMpToken" class="flex-1 border border-slate-300 rounded-lg px-4 py-2 outline-none focus:border-blue-500" placeholder="Seu Access Token Mercado Pago">
+                        <input type="text" id="adminMpToken" class="flex-1 border border-slate-300 rounded-lg px-4 py-2 outline-none focus:border-blue-500 bg-white text-slate-900" placeholder="Seu Access Token Mercado Pago">
                         <button onclick="salvarTokenAdmin()" class="px-6 py-2 bg-slate-900 text-white rounded-lg font-medium">Salvar Token</button>
                     </div>
                 </div>
                 <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-                    <div class="p-6 border-b border-slate-200 bg-slate-50 flex justify-between"><h3 class="font-bold text-lg">Anunciantes Cadastrados</h3></div>
+                    <div class="p-6 border-b border-slate-200 bg-slate-50 flex justify-between"><h3 class="font-bold text-lg text-slate-900">Anunciantes Cadastrados</h3></div>
                     <table class="w-full text-left border-collapse">
                         <thead><tr class="border-b border-slate-200 text-sm text-slate-500"><th class="p-4">Usuário / Email</th><th class="p-4">WhatsApp</th></tr></thead>
                         <tbody id="listaAdminUsers" class="text-sm text-slate-600"></tbody>
@@ -305,9 +334,8 @@
         let userData = null;
         let postAtualId = null;
         
-        // Estado do Filtro
         let categoriaAtiva = "";
-        let listaPostsFeed = []; // Cache local para não bater no Firebase toda hora que digitar
+        let listaPostsFeed = []; 
 
         window.showView = (viewId) => {
             document.getElementById('view-feed').classList.add('hidden');
@@ -339,11 +367,8 @@
 
         window.goToPanel = () => {
             if(!currentUser) return;
-            if(currentUser.email === ADMIN_EMAIL) {
-                showView('admin'); carregarListaAdmin();
-            } else {
-                showView('advertiser');
-            }
+            if(currentUser.email === ADMIN_EMAIL) { showView('admin'); carregarListaAdmin(); } 
+            else { showView('advertiser'); }
         };
 
         onAuthStateChanged(auth, async (user) => {
@@ -360,9 +385,8 @@
                 const userRef = doc(db, "usuarios", user.uid);
                 const docSnap = await getDoc(userRef);
                 
-                if(docSnap.exists()) {
-                    userData = docSnap.data();
-                } else {
+                if(docSnap.exists()) { userData = docSnap.data(); } 
+                else {
                     userData = { nome: user.displayName, email: user.email, gatewayKey: "", whatsapp: "", fotoPerfil: "" };
                     await setDoc(userRef, userData);
                 }
@@ -413,13 +437,9 @@
                         const img = new Image();
                         img.onload = () => {
                             const canvas = document.createElement('canvas');
-                            const size = 200; 
-                            canvas.width = size; canvas.height = size;
-                            const ctx = canvas.getContext('2d');
+                            canvas.width = 200; canvas.height = 200;
                             const minSize = Math.min(img.width, img.height);
-                            const sx = (img.width - minSize) / 2;
-                            const sy = (img.height - minSize) / 2;
-                            ctx.drawImage(img, sx, sy, minSize, minSize, 0, 0, size, size);
+                            canvas.getContext('2d').drawImage(img, (img.width - minSize)/2, (img.height - minSize)/2, minSize, minSize, 0, 0, 200, 200);
                             resolve(canvas.toDataURL('image/jpeg', 0.8));
                         };
                         img.src = e.target.result;
@@ -430,95 +450,67 @@
 
             try {
                 await updateProfile(currentUser, { displayName: novoNome });
-                userData.nome = novoNome;
-                userData.fotoPerfil = novaFoto;
+                userData.nome = novoNome; userData.fotoPerfil = novaFoto;
                 await updateDoc(doc(db, "usuarios", currentUser.uid), { nome: novoNome, fotoPerfil: novaFoto });
 
-                const q = query(collection(db, "anuncios"), where("donoId", "==", currentUser.uid));
-                const snap = await getDocs(q);
-                
+                const snap = await getDocs(query(collection(db, "anuncios"), where("donoId", "==", currentUser.uid)));
                 if(!snap.empty) {
                     const batch = writeBatch(db);
                     snap.forEach(docSnap => batch.update(docSnap.ref, { donoNome: novoNome, donoFoto: novaFoto }));
                     await batch.commit();
                 }
 
-                alert("Perfil atualizado! As novas informações já aparecem nos seus anúncios.");
+                alert("Perfil atualizado!");
                 document.getElementById('advName').innerText = novoNome;
                 carregarMeusAnuncios();
-            } catch (error) {
-                console.error(error); alert("Erro ao atualizar.");
-            } finally {
-                btn.innerText = "Atualizar Perfil e Publicações"; btn.disabled = false;
-            }
+            } catch (error) { console.error(error); alert("Erro ao atualizar."); } 
+            finally { btn.innerText = "Atualizar Perfil e Publicações"; btn.disabled = false; }
         };
 
         window.salvarConfigAnunciante = async () => {
-            const key = document.getElementById('advGatewayKey').value;
-            await updateDoc(doc(db, "usuarios", currentUser.uid), { gatewayKey: key });
+            await updateDoc(doc(db, "usuarios", currentUser.uid), { gatewayKey: document.getElementById('advGatewayKey').value });
             alert("Configurações atualizadas!"); location.reload(); 
         };
 
         document.getElementById('postTipo').addEventListener('change', (e) => {
-            const divPreco = document.getElementById('divPreco');
-            const divArquivo = document.getElementById('divArquivo');
-            if(e.target.value === 'pago') { divPreco.classList.remove('hidden'); divArquivo.classList.remove('hidden'); }
-            else if(e.target.value === 'gratis') { divPreco.classList.add('hidden'); divArquivo.classList.remove('hidden'); }
-            else { divPreco.classList.add('hidden'); divArquivo.classList.add('hidden'); }
+            const dp = document.getElementById('divPreco'); const da = document.getElementById('divArquivo');
+            if(e.target.value === 'pago') { dp.classList.remove('hidden'); da.classList.remove('hidden'); }
+            else if(e.target.value === 'gratis') { dp.classList.add('hidden'); da.classList.remove('hidden'); }
+            else { dp.classList.add('hidden'); da.classList.add('hidden'); }
         });
 
         document.getElementById('formNovoAnuncio').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const btn = document.getElementById('btnSalvarPost');
-            btn.innerText = "Processando..."; btn.disabled = true;
+            const btn = document.getElementById('btnSalvarPost'); btn.innerText = "Processando..."; btn.disabled = true;
 
             const file = document.getElementById('postImg').files[0];
             const reader = new FileReader();
-            
             reader.onload = async (event) => {
                 const img = new Image();
                 img.onload = async () => {
                     const canvas = document.createElement('canvas');
-                    const scaleSize = 800 / img.width;
-                    canvas.width = 800; canvas.height = img.height * scaleSize;
+                    canvas.width = 800; canvas.height = img.height * (800 / img.width);
                     canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
                     const imgBase64 = canvas.toDataURL('image/jpeg', 0.6);
 
                     const arquivoInput = document.getElementById('postArquivo').files[0];
                     let arquivoData = ""; let arquivoNome = "";
-
                     if(arquivoInput) {
                         arquivoNome = arquivoInput.name;
-                        arquivoData = await new Promise((resolve) => {
-                            const r = new FileReader();
-                            r.onload = e => resolve(e.target.result);
-                            r.readAsDataURL(arquivoInput);
-                        });
+                        arquivoData = await new Promise(r => { const rd = new FileReader(); rd.onload = e => r(e.target.result); rd.readAsDataURL(arquivoInput); });
                     }
 
                     await addDoc(collection(db, "anuncios"), {
-                        donoId: currentUser.uid,
-                        donoNome: userData.nome || currentUser.displayName,
-                        donoFoto: userData.fotoPerfil || "",
-                        titulo: document.getElementById('postTitulo').value,
-                        categoria: document.getElementById('postCategoria').value, // SALVANDO A CATEGORIA
-                        descricao: document.getElementById('postDesc').value,
-                        whatsapp: document.getElementById('postWhats').value || userData.whatsapp,
-                        tipo: document.getElementById('postTipo').value,
-                        preco: document.getElementById('postPreco').value || 0,
-                        imagem: imgBase64,
-                        arquivoData: arquivoData,
-                        arquivoNome: arquivoNome,
-                        likes: 0,
-                        data: serverTimestamp()
+                        donoId: currentUser.uid, donoNome: userData.nome || currentUser.displayName, donoFoto: userData.fotoPerfil || "",
+                        titulo: document.getElementById('postTitulo').value, categoria: document.getElementById('postCategoria').value,
+                        descricao: document.getElementById('postDesc').value, whatsapp: document.getElementById('postWhats').value || userData.whatsapp,
+                        tipo: document.getElementById('postTipo').value, preco: document.getElementById('postPreco').value || 0,
+                        imagem: imgBase64, arquivoData: arquivoData, arquivoNome: arquivoNome, likes: 0, data: serverTimestamp()
                     });
                     
-                    alert("Publicado com sucesso!");
-                    document.getElementById('formNovoAnuncio').reset();
+                    alert("Publicado com sucesso!"); document.getElementById('formNovoAnuncio').reset();
                     btn.innerText = "Publicar Agora"; btn.disabled = false;
-                    switchTab('adv-dashboard');
-                    carregarMeusAnuncios();
-                    baixarPostsFeed(); // Atualiza a rede social principal
+                    switchTab('adv-dashboard'); carregarMeusAnuncios(); baixarPostsFeed();
                 };
                 img.src = event.target.result;
             };
@@ -528,36 +520,28 @@
         async function carregarMeusAnuncios() {
             if(!currentUser) return;
             const container = document.getElementById('meusAnunciosLista');
-            const q = query(collection(db, "anuncios"), where("donoId", "==", currentUser.uid));
-            const snap = await getDocs(q);
+            const snap = await getDocs(query(collection(db, "anuncios"), where("donoId", "==", currentUser.uid)));
             
             container.innerHTML = "";
             if(snap.empty) { container.innerHTML = "<p class='text-slate-400 text-sm'>Você ainda não publicou nada.</p>"; return; }
 
             snap.forEach(async (docSnap) => {
-                const p = docSnap.data();
-                const id = docSnap.id;
-                
+                const p = docSnap.data(); const id = docSnap.id;
                 const commSnap = await getDocs(collection(db, `anuncios/${id}/comentarios`));
                 let comentariosHtml = "";
                 commSnap.forEach(c => {
                     const cd = c.data();
-                    let stars = '★'.repeat(cd.nota) + '☆'.repeat(6 - cd.nota);
-                    comentariosHtml += `<div class="bg-slate-50 p-3 rounded-xl border border-slate-100 mt-2 text-sm">
-                        <div class="flex justify-between text-slate-800 font-bold mb-1"><span>${cd.usuario}</span><span class="text-yellow-400">${stars}</span></div>
-                        <span class="text-slate-600">${cd.texto}</span>
-                    </div>`;
+                    comentariosHtml += `<div class="bg-slate-50 p-3 rounded-xl border border-slate-100 mt-2 text-sm"><div class="flex justify-between text-slate-800 font-bold mb-1"><span>${cd.usuario}</span><span class="text-yellow-400">${'★'.repeat(cd.nota) + '☆'.repeat(6 - cd.nota)}</span></div><span class="text-slate-600">${cd.texto}</span></div>`;
                 });
 
                 container.innerHTML += `
-                    <div class="border border-slate-100 rounded-2xl p-5 flex flex-col gap-4 shadow-sm hover:shadow-md transition-shadow bg-white">
+                    <div class="border border-slate-100 rounded-2xl p-5 flex flex-col gap-4 shadow-sm bg-white">
                         <div class="flex items-center justify-between">
                             <div class="flex items-center gap-4">
                                 <img src="${p.imagem}" class="w-14 h-14 object-cover rounded-xl shadow-sm">
                                 <div>
                                     <h4 class="font-extrabold text-slate-800 text-lg">${p.titulo}</h4>
-                                    <span class="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded mr-1">${p.categoria || 'Geral'}</span>
-                                    <span class="text-xs bg-blue-50 text-blue-600 px-2.5 py-1 rounded-md uppercase font-bold tracking-wider">${p.tipo}</span>
+                                    <span class="text-xs bg-blue-100 text-blue-800 font-bold px-2 py-0.5 rounded mr-1">${p.categoria || 'Geral'}</span>
                                 </div>
                             </div>
                             <div class="flex gap-2">
@@ -574,94 +558,63 @@
             });
         }
 
-        window.copiarLink = (id) => {
-            const url = window.location.origin + window.location.pathname + "#post=" + id;
-            navigator.clipboard.writeText(url); alert("Link do anúncio copiado!");
-        };
+        window.copiarLink = (id) => { navigator.clipboard.writeText(window.location.origin + window.location.pathname + "#post=" + id); alert("Link copiado!"); };
+        window.deletarAnuncio = async (id) => { if(confirm("Deseja excluir?")) { await deleteDoc(doc(db, "anuncios", id)); alert("Excluído!"); carregarMeusAnuncios(); baixarPostsFeed(); } };
 
-        window.deletarAnuncio = async (id) => {
-            if(confirm("Tem certeza que deseja excluir permanentemente esta publicação?")) {
-                await deleteDoc(doc(db, "anuncios", id));
-                alert("Publicação excluída com sucesso!");
-                carregarMeusAnuncios(); baixarPostsFeed();
-            }
-        };
-
-        // ==========================================
-        // FILTROS E PESQUISA INTELIGENTE DO FEED
-        // ==========================================
-        
+        // FILTROS E PESQUISA FEED
         window.setCategoriaFiltro = (cat) => {
             categoriaAtiva = cat;
-            
-            // Atualiza visual dos botões
             document.querySelectorAll('.cat-btn').forEach(btn => {
-                if(btn.dataset.cat === cat) {
-                    btn.classList.remove('btn-filter-inactive');
-                    btn.classList.add('btn-filter-active');
-                } else {
-                    btn.classList.remove('btn-filter-active');
-                    btn.classList.add('btn-filter-inactive');
-                }
+                if(btn.dataset.cat === cat) { btn.classList.remove('btn-filter-inactive'); btn.classList.add('btn-filter-active'); } 
+                else { btn.classList.remove('btn-filter-active'); btn.classList.add('btn-filter-inactive'); }
             });
-            
             renderizarFeed();
         };
 
         window.filtrarFeed = () => { renderizarFeed(); };
 
-        // Baixa os posts do firebase e salva no Array local uma vez (ou ao atualizar)
         async function baixarPostsFeed() {
             const snap = await getDocs(collection(db, "anuncios"));
             listaPostsFeed = [];
-            snap.forEach(docSnap => {
-                listaPostsFeed.push({ id: docSnap.id, ...docSnap.data() });
-            });
+            snap.forEach(docSnap => listaPostsFeed.push({ id: docSnap.id, ...docSnap.data() }));
             renderizarFeed();
         }
 
-        // Desenha na tela baseando-se na pesquisa e filtros
         function renderizarFeed() {
             const feed = document.getElementById('feedGrid');
             feed.innerHTML = "";
             const termoBusca = document.getElementById('searchInput').value.toLowerCase().trim();
             
             let postsFiltrados = listaPostsFeed.filter(p => {
-                // Filtro Categoria
                 if (categoriaAtiva !== "" && p.categoria !== categoriaAtiva) return false;
-                
-                // Filtro Texto Inteligente (Titulo, Descrição ou Nome do autor)
                 if (termoBusca !== "") {
-                    const tituloOk = p.titulo.toLowerCase().includes(termoBusca);
-                    const descOk = p.descricao.toLowerCase().includes(termoBusca);
-                    const autorOk = p.donoNome.toLowerCase().includes(termoBusca);
-                    if (!tituloOk && !descOk && !autorOk) return false;
+                    return p.titulo.toLowerCase().includes(termoBusca) || p.descricao.toLowerCase().includes(termoBusca) || p.donoNome.toLowerCase().includes(termoBusca);
                 }
-                
                 return true;
             });
 
-            if(postsFiltrados.length === 0) {
-                feed.innerHTML = "<p class='col-span-full text-center text-slate-500 font-medium py-10 text-lg'>Nenhum resultado encontrado para a sua busca. 😢</p>"; 
-                return; 
-            }
+            if(postsFiltrados.length === 0) { feed.innerHTML = "<p class='col-span-full text-center text-white/70 font-medium py-10 text-lg'>Nenhum resultado encontrado. 😢</p>"; return; }
 
-            postsFiltrados.forEach(p => {
+            postsFiltrados.forEach((p, index) => {
                 let badge = "";
-                if(p.tipo === 'gratis') badge = '<span class="absolute top-4 left-4 bg-green-500 text-white text-xs font-black tracking-wider px-3 py-1.5 rounded-lg shadow-lg">GRÁTIS</span>';
-                if(p.tipo === 'pago') badge = `<span class="absolute top-4 left-4 bg-slate-900 text-white text-xs font-black tracking-wider px-3 py-1.5 rounded-lg shadow-lg">R$ ${p.preco}</span>`;
+                if(p.tipo === 'gratis') badge = '<span class="absolute top-4 left-4 bg-green-500 text-white text-xs font-black tracking-wider px-3 py-1.5 rounded-lg shadow-lg z-10">GRÁTIS</span>';
+                if(p.tipo === 'pago') badge = `<span class="absolute top-4 left-4 bg-slate-900 text-white text-xs font-black tracking-wider px-3 py-1.5 rounded-lg shadow-lg z-10">R$ ${p.preco}</span>`;
                 
-                // Badge da Categoria na Imagem
-                const badgeCat = p.categoria ? `<span class="absolute top-4 right-4 bg-white/90 backdrop-blur-sm text-slate-800 text-xs font-bold px-3 py-1.5 rounded-lg shadow-lg">${p.categoria}</span>` : '';
+                // Badge com a mesma cor do fundo
+                const badgeCat = p.categoria ? `<span class="absolute top-4 right-4 bg-gradient-to-r from-blue-700 to-blue-900 text-white text-xs font-bold px-3 py-1.5 rounded-lg shadow-lg z-10">${p.categoria}</span>` : '';
+                
+                // Delay em cascata para animação
+                const delayClass = `delay-${(index % 3) + 1}`;
 
                 feed.innerHTML += `
-                    <div class="bg-white rounded-[2rem] overflow-hidden shadow-sm hover:shadow-2xl transition-all border border-slate-100 cursor-pointer group flex flex-col hover:-translate-y-1 duration-300" onclick="abrirPost('${p.id}')">
-                        <div class="h-64 overflow-hidden relative bg-slate-50">
+                    <div class="bg-white rounded-[2rem] overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-300 border-2 border-transparent hover:border-blue-400 cursor-pointer group flex flex-col hover:-translate-y-2 animate-fade-up ${delayClass}" onclick="abrirPost('${p.id}')">
+                        <div class="h-64 overflow-hidden relative bg-slate-50 border-b border-slate-100">
                             ${badge}
                             ${badgeCat}
-                            <img src="${p.imagem}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700">
+                            <div class="absolute inset-0 bg-gradient-to-t from-slate-900/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity z-0 pointer-events-none"></div>
+                            <img src="${p.imagem}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 relative z-0">
                         </div>
-                        <div class="p-6 flex-1 flex flex-col">
+                        <div class="p-6 flex-1 flex flex-col text-slate-800">
                             <h3 class="text-xl font-extrabold text-slate-900 mb-2 line-clamp-1 leading-tight group-hover:text-blue-600 transition-colors">${p.titulo}</h3>
                             <p class="text-slate-500 text-sm line-clamp-2 mb-6 flex-1 leading-relaxed">${p.descricao}</p>
                             <div class="flex items-center justify-between border-t border-slate-100 pt-5">
@@ -680,24 +633,18 @@
             document.getElementById('inputNota').value = nota;
             const stars = document.querySelectorAll('.star-btn');
             stars.forEach((star, index) => {
-                if (index < nota) {
-                    star.classList.remove('text-slate-200'); star.classList.add('text-yellow-400');
-                } else {
-                    star.classList.remove('text-yellow-400'); star.classList.add('text-slate-200');
-                }
+                if (index < nota) { star.classList.remove('text-slate-200'); star.classList.add('text-yellow-400'); } 
+                else { star.classList.remove('text-yellow-400'); star.classList.add('text-slate-200'); }
             });
         };
 
         window.abrirPost = async (postId) => {
-            postAtualId = postId;
-            showView('post');
-            setNota(6); 
-
+            postAtualId = postId; showView('post'); setNota(6); 
             document.getElementById('postPageImg').src = "";
             document.getElementById('postPageTitulo').innerText = "Carregando...";
             document.getElementById('postPageDesc').innerText = "";
-            document.getElementById('postPageCategoria').innerText = "";
-            document.getElementById('containerComentarios').innerHTML = "<p class='text-slate-400 text-sm'>Carregando avaliações...</p>";
+            document.getElementById('postPageCategoria').classList.add('hidden');
+            document.getElementById('containerComentarios').innerHTML = "<p class='text-slate-400 text-sm'>Carregando...</p>";
             document.getElementById('postPageActions').innerHTML = "";
 
             const snap = await getDoc(doc(db, "anuncios", postId));
@@ -708,12 +655,9 @@
             document.getElementById('postPageTitulo').innerText = p.titulo;
             document.getElementById('postPageDesc').innerText = p.descricao;
             
-            // Exibir categoria na pagina
             if(p.categoria) {
                 document.getElementById('postPageCategoria').innerText = p.categoria;
                 document.getElementById('postPageCategoria').classList.remove('hidden');
-            } else {
-                document.getElementById('postPageCategoria').classList.add('hidden');
             }
 
             await carregarComentariosPost(postId);
@@ -721,8 +665,7 @@
             const actionsDiv = document.getElementById('postPageActions');
             if(p.whatsapp) actionsDiv.innerHTML += `<a href="https://wa.me/${p.whatsapp}" target="_blank" class="w-full py-4 bg-green-500 hover:bg-green-600 text-white text-center rounded-2xl font-bold flex items-center justify-center gap-3 transition-colors shadow-lg shadow-green-500/30 text-lg"><i class="fab fa-whatsapp text-2xl"></i> Falar no WhatsApp</a>`;
             if(p.tipo === 'gratis') {
-                if(p.arquivoData) actionsDiv.innerHTML += `<a href="${p.arquivoData}" download="${p.arquivoNome || 'arquivo'}" class="w-full py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl font-bold flex items-center justify-center gap-3 transition-colors text-center shadow-lg shadow-blue-500/30 text-lg"><i class="fas fa-download text-xl"></i> Baixar Arquivo Grátis</a>`;
-                else actionsDiv.innerHTML += `<button class="w-full py-4 bg-slate-100 text-slate-400 rounded-2xl font-bold cursor-not-allowed">Nenhum arquivo disponível</button>`;
+                if(p.arquivoData) actionsDiv.innerHTML += `<a href="${p.arquivoData}" download="${p.arquivoNome || 'arquivo'}" class="w-full py-4 bg-blue-700 hover:bg-blue-800 text-white rounded-2xl font-bold flex items-center justify-center gap-3 transition-colors text-center shadow-lg shadow-blue-700/30 text-lg"><i class="fas fa-download text-xl"></i> Baixar Arquivo Grátis</a>`;
             } else if(p.tipo === 'pago') {
                 actionsDiv.innerHTML += `<button onclick="alert('Integração com pagamento em breve!')" class="w-full py-4 bg-slate-900 hover:bg-slate-800 text-white rounded-2xl font-bold flex items-center justify-center gap-3 transition-colors shadow-lg shadow-slate-900/30 text-lg"><i class="fas fa-shopping-cart text-xl"></i> Comprar Agora (R$ ${p.preco})</button>`;
             }
@@ -731,13 +674,10 @@
         async function carregarComentariosPost(postId) {
             const commSnap = await getDocs(collection(db, `anuncios/${postId}/comentarios`));
             const container = document.getElementById('containerComentarios');
-            container.innerHTML = "";
-            let count = 0;
+            container.innerHTML = ""; let count = 0;
             commSnap.forEach(c => {
-                count++;
-                const cd = c.data();
-                let stars = '★'.repeat(cd.nota) + '☆'.repeat(6 - cd.nota);
-                container.innerHTML += `<div class="bg-slate-50 p-4 rounded-2xl border border-slate-100 shadow-sm"><div class="flex justify-between items-center mb-2"><span class="font-bold text-slate-800 text-sm">${cd.usuario}</span><span class="text-yellow-400 text-lg tracking-widest">${stars}</span></div><p class="text-slate-600 text-sm leading-relaxed">${cd.texto}</p></div>`;
+                count++; const cd = c.data();
+                container.innerHTML += `<div class="bg-slate-50 p-4 rounded-2xl border border-slate-100 shadow-sm"><div class="flex justify-between items-center mb-2"><span class="font-bold text-slate-800 text-sm">${cd.usuario}</span><span class="text-yellow-400 text-lg tracking-widest">${'★'.repeat(cd.nota) + '☆'.repeat(6 - cd.nota)}</span></div><p class="text-slate-600 text-sm leading-relaxed">${cd.texto}</p></div>`;
             });
             if(count === 0) container.innerHTML = `<p class='text-slate-400 text-sm italic'>Nenhuma avaliação ainda. Seja o primeiro!</p>`;
         }
@@ -754,21 +694,13 @@
             btn.innerText = "Enviando..."; btn.disabled = true;
 
             await addDoc(collection(db, `anuncios/${postAtualId}/comentarios`), {
-                usuario: userData.nome || currentUser.displayName,
-                nota: Number(nota),
-                texto: texto,
-                data: serverTimestamp()
+                usuario: userData.nome || currentUser.displayName, nota: Number(nota), texto: texto, data: serverTimestamp()
             });
 
-            document.getElementById('inputComentario').value = "";
-            alert("Avaliação enviada com sucesso!");
-            btn.innerText = "Publicar Avaliação"; btn.disabled = false;
-            carregarComentariosPost(postAtualId);
+            document.getElementById('inputComentario').value = ""; alert("Avaliação enviada com sucesso!");
+            btn.innerText = "Publicar Avaliação"; btn.disabled = false; carregarComentariosPost(postAtualId);
         });
 
-        // ==========================================
-        // INIT
-        // ==========================================
         baixarPostsFeed();
     </script>
 </body>
