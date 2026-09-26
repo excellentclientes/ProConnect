@@ -16,7 +16,7 @@ const firebaseConfig = {
 // ==========================================
 // CONFIGURAÇÃO DO GESTOR (SEU E-MAIL AQUI)
 // ==========================================
-const ADMIN_EMAIL = "seu.email.real@gmail.com"; // Substitua pelo seu e-mail do Google
+const ADMIN_EMAIL = "excellentservices.excel@gmail.com"; // Substitua pelo seu e-mail do Google
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
